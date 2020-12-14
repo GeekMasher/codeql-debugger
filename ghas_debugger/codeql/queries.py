@@ -5,13 +5,6 @@ import subprocess
 QUERIES_PATH = os.path.join(os.getcwd(), "queries")
 RESULTS_PATH = os.path.join(os.getcwd(), "results")
 
-QUERIES = {
-    "lines_of_code": "LinesOfCode",
-    # "commented_code": "LinesOfCommentedCode",
-    # "commented": "LinesOfComment",
-    # "tests": "NumberOfTests"
-}
-
 
 class Queries:
     def __init__(
@@ -19,13 +12,13 @@ class Queries:
         languages=[],
         results: str = RESULTS_PATH,
         queries_path: str = QUERIES_PATH,
-        database: str = None,
-        codeql_bin: str = None
+        databases: list = None,
+        codeql: str = None
     ):
         self.queries_path = queries_path
         self.languages = languages
-        self.codeql_bin = codeql_bin
-        self.database = database
+        self.codeql_exec = codeql
+        self.databases = databases
 
         self.data = {}
 
@@ -34,52 +27,52 @@ class Queries:
             logging.debug("Creating results dir :: " + self.results)
             os.makedirs(self.results)
 
-    def findQueryLocation(self, path, language):
-        query_dir = os.path.join(self.queries_path, language)
-        if not os.path.exists(query_dir):
-            raise Exception("Unknown Query Directory")
+    def getQueriesList(self, language=None):
+        query_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(self.queries_path) for f in filenames if os.path.splitext(f)[1] == '.ql']
 
-        if not path.endswith(".ql"):
-            path = path + ".ql"
+        results = []
+        for query in query_files:
+            lang = os.path.split(query.replace(self.queries_path, ''))[0]
 
-        query_file = os.path.join(query_dir, path)
-        if not os.path.exists(query_file):
-            raise Exception("Unknown Query File location :: " + query_file)
+            # if language and language != lang:
+            #     continue
 
-        return query_file
+            results.append({
+                "name": os.path.splitext(os.path.basename(query))[0],
+                "path": query,
+                "language": lang.replace('/', '')
+            })
+
+        return results
+
+    def findQuery(self, name, language=None):
+        results = []
+
+        for query in self.getQueriesList(language=language):
+            if query.get('name') == name:
+                results.append(query)
+
+        return results
 
     def runQuery(self, query, output):
-        if self.codeql_bin is None:
+        if self.codeql_exec is None:
             raise Exception("CodeQL binary isn't loaded")
 
-        command = [
-            self.codeql_bin, "database", "analyze",
-            '--search-path', './queries/',
-            '--format', 'csv',
-            '--output', output,
-            self.database,
-            query
-        ]
-        """
-        ./bin/codeql-cli/codeql database upgrade \
-        --search-path=./queries/ \
-        --search-path=./queries/ \
-        ./databases/$NAME
+        for database in self.databases:
+            command = [
+                self.codeql_exec, "database", "analyze",
+                '--search-path', './queries/',
+                '--format', 'csv',
+                '--output', output,
+                database.get('path'),
+                query.get('path')
+            ]
 
-        ./bin/codeql-cli/codeql database analyze \
-            --ram=8000 --threads=4 \
-            --search-path=./queries/ \
-            --format="sarif-latest" \
-            --output="./results/$NAME-query.sarif" \
-            ./databases/$NAME \
-            queries/custom/javascript/HardcodedPassword.ql
-        """
+            logging.debug("CodeQL Command :: " + str(command))
 
-        logging.debug("CodeQL Command :: " + str(command))
+            print(' '.join(command))
 
-        print(' '.join(command))
-
-        subprocess.run(command)
+            # subprocess.run(command)
 
         return output
 
