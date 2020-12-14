@@ -49,9 +49,7 @@ logging.info("CodeQL Binary :: " + ",".join(CODEQL_BINS))
 logging.info("CodeQL Search Path :: " + ",".join(CODEQL_SEARCH_PATH))
 
 # Gets a list of the CodeQL databases
-databases = getDatabases(
-    CODEQL_DATABASE, name=arguments.database_name
-)
+databases = getDatabases(CODEQL_DATABASE, name=arguments.database_name)
 
 codeql_queries = getQueriesList("./queries")
 
@@ -67,7 +65,7 @@ queries = Queries(
 # [print(loc) for loc in getQueriesList()]
 # exit()
 loc = queries.findQuery("LinesOfCode")
-queries.runQuery(loc[0], "results/test.csv")
+queries.runQuery(loc[0], "results")
 print(loc)
 
 

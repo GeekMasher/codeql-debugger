@@ -26,6 +26,7 @@ def getQueriesList(root, language=None):
 
     return results
 
+
 class Queries:
     def __init__(
         self,
@@ -59,24 +60,29 @@ class Queries:
         return results
 
     def runQuery(self, query, output):
+        """
+
+        output: Dir of
+        """
         if self.codeql_exec is None:
             raise Exception("CodeQL binary isn't loaded")
 
-        for database in self.databases:
+        multi_language = True if len(self.databases) < 1 else False
 
-        #    command = [
-        #        self.codeql_exec,
-        #        "database",
-        #        "analyze",
-        #        "--search-path",
-        #        self.search_paths[0],
-        #        "--format",
-        #        "csv",
-        #        "--output",
-        #        output,
-        #        database.get("path"),
-        #        query.get("path"),
-        #    ]
+        file_format = "{query_name}-{language}.{format}"
+
+        for database in self.databases:
+            file_output_bqrs = os.path.join(
+                output,
+                file_format.format(
+                    query_name=query.get("name"),
+                    language=database.get("language"),
+                    format="bqrs",
+                ),
+            )
+
+            logging.debug("CodeQL query run Output :: " + file_output_bqrs)
+
             command = [
                 self.codeql_exec,
                 "query",
@@ -86,29 +92,40 @@ class Queries:
                 "-d",
                 database.get("path"),
                 "-o",
-                "result.bqrs",
+                file_output_bqrs,
                 query.get("path"),
             ]
 
             logging.debug("CodeQL Command :: " + str(command))
 
-            print(" ".join(command))
-            # TODO: Pipe output
-            subprocess.run(command)
+            with open(file_output_bqrs + ".log", "w") as handle:
+                subprocess.run(command, stdout=handle, stderr=handle)
 
+            # BQRS to format
+            file_output_csv = os.path.join(
+                output,
+                file_format.format(
+                    query_name=query.get("name"),
+                    language=database.get("language"),
+                    format="csv",
+                ),
+            )
             command = [
                 self.codeql_exec,
                 "bqrs",
                 "decode",
                 "--format=csv",
-                "result.bqrs"
+                "-o",
+                file_output_csv,
+                file_output_bqrs,
             ]
 
             logging.debug("CodeQL Command :: " + str(command))
 
             print(" ".join(command))
             # TODO: Pipe output
-            subprocess.run(command)
+            with open(file_output_csv + ".log", "w") as handle:
+                subprocess.run(command, stdout=handle, stderr=handle)
 
         return output
 
