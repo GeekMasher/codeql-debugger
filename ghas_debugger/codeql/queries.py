@@ -49,6 +49,7 @@ class Queries:
 
         self.results = results
         self.results_log = os.path.join(self.results, "logs")
+        self.results_artifacts = os.path.join(self.results, "artifacts")
 
         self.caching = caching
 
@@ -80,7 +81,7 @@ class Queries:
 
         for database in self.databases:
             file_output_bqrs = os.path.join(
-                output,
+                self.results_artifacts,
                 file_format.format(
                     query_name=query.get("name"),
                     language=database.get("language"),
@@ -124,7 +125,7 @@ class Queries:
 
             # BQRS to format
             file_output_csv = os.path.join(
-                output,
+                self.results_artifacts,
                 file_format.format(
                     query_name=query.get("name"),
                     language=database.get("language"),
