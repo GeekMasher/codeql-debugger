@@ -63,18 +63,45 @@ class Queries:
             raise Exception("CodeQL binary isn't loaded")
 
         for database in self.databases:
+
+        #    command = [
+        #        self.codeql_exec,
+        #        "database",
+        #        "analyze",
+        #        "--search-path",
+        #        self.search_paths[0],
+        #        "--format",
+        #        "csv",
+        #        "--output",
+        #        output,
+        #        database.get("path"),
+        #        query.get("path"),
+        #    ]
             command = [
                 self.codeql_exec,
-                "database",
-                "analyze",
+                "query",
+                "run",
                 "--search-path",
                 self.search_paths[0],
-                "--format",
-                "csv",
-                "--output",
-                output,
+                "-d",
                 database.get("path"),
+                "-o",
+                "result.bqrs",
                 query.get("path"),
+            ]
+
+            logging.debug("CodeQL Command :: " + str(command))
+
+            print(" ".join(command))
+            # TODO: Pipe output
+            subprocess.run(command)
+
+            command = [
+                self.codeql_exec,
+                "bqrs",
+                "decode",
+                "--format=csv",
+                "result.bqrs"
             ]
 
             logging.debug("CodeQL Command :: " + str(command))
