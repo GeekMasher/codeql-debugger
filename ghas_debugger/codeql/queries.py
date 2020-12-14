@@ -48,9 +48,7 @@ class Queries:
         self.data = {}
 
         self.results = results
-        if not os.path.exists(self.results):
-            logging.debug("Creating results dir :: " + self.results)
-            os.makedirs(self.results)
+        self.results_log = os.path.join(self.results, "logs")
 
         self.caching = caching
 
@@ -78,8 +76,6 @@ class Queries:
 
         results = {}
 
-        multi_language = True if len(self.databases) < 1 else False
-
         file_format = "{query_name}-{language}.{format}"
 
         for database in self.databases:
@@ -93,7 +89,7 @@ class Queries:
             )
 
             if self.caching and os.path.exists(file_output_bqrs):
-                logging.info("Using cached copy of the query :: " + query.get('name'))
+                logging.info("Using cached copy of the query :: " + query.get("name"))
             else:
                 # Caching disabled or doesn't exist
 
@@ -114,7 +110,16 @@ class Queries:
 
                 logging.debug("CodeQL Command :: " + str(command))
 
-                with open(file_output_bqrs + ".log", "w") as handle:
+                file_output_bqrs_logs = os.path.join(
+                    self.results_log,
+                    file_format.format(
+                        query_name=query.get("name"),
+                        language=database.get("language"),
+                        format="log",
+                    ),
+                )
+
+                with open(file_output_bqrs_logs, "w") as handle:
                     subprocess.run(command, stdout=handle, stderr=handle)
 
             # BQRS to format
@@ -138,26 +143,37 @@ class Queries:
 
             logging.debug("CodeQL Command :: " + str(command))
 
-            with open(file_output_csv + ".log", "w") as handle:
+            file_output_csv_logs = os.path.join(
+                self.results_log,
+                file_format.format(
+                    query_name=query.get("name"),
+                    language=database.get("language"),
+                    format="log",
+                ),
+            )
+            with open(file_output_csv_logs, "w") as handle:
                 subprocess.run(command, stdout=handle, stderr=handle)
 
-            results[database.get("language")] = {"query_name": query.get("name"), "path": file_output_csv}
+            results[database.get("language")] = {
+                "query_name": query.get("name"),
+                "path": file_output_csv,
+            }
 
         return results
 
     def getResults(self, results):
         # Processing Result files
-        logging.info('Process result files')
+        logging.info("Process result files")
 
         return_results = {}
 
         for language, result in results.items():
 
-            logging.debug('Processing Result file :: ' + result.get('path'))
+            logging.debug("Processing Result file :: " + result.get("path"))
 
             # Parse CSV to results
-            with open(result.get('path'), 'r') as handle_csv:
-                csv_reader = csv.DictReader(handle_csv, delimiter=',', quotechar='\"')
+            with open(result.get("path"), "r") as handle_csv:
+                csv_reader = csv.DictReader(handle_csv, delimiter=",", quotechar='"')
 
                 result["results"] = []
                 for row in csv_reader:
