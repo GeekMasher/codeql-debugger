@@ -145,23 +145,6 @@ class Queries:
 
         return results
 
-    def runQueries(self):
-        for query_name, query_path in QUERIES.items():
-            logging.info("Loading Query :: " + query_name)
-
-            self.data[query_name] = {}
-
-            for language in self.languages:
-                query_path = self.findQueryLocation(query_path, language)
-
-                output_path = os.path.join(
-                    self.results, language + "-" + query_name + ".csv"
-                )
-
-                self.data[query_name][language] = self.runQuery(query_path, output_path)
-
-        return self.data
-
     def getResults(self, results):
         # Processing Result files
         logging.info('Process result files')
