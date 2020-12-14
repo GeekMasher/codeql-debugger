@@ -2,6 +2,23 @@ import os
 import csv
 import logging
 import subprocess
+from os.path import join, splitext
+
+
+def file_suffixes(d):
+    extensions = {}
+    for root, dirs, files in os.walk(d):
+        dirs[:] = [d for d in dirs if d != '.git']
+        for f in files:
+            filepath = join(root, f)
+            _, ext = splitext(filepath)
+            if not ext in extensions:
+                extensions[ext] = 0
+            extensions[ext] = extensions[ext] + 1
+
+    extensions = list(extensions.items())
+    extensions.sort(key = lambda i: i[1], reverse=True)
+    return extensions
 
 
 def getQueriesList(root, language=None):
