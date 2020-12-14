@@ -1,4 +1,5 @@
 import os
+import csv
 import logging
 import subprocess
 
@@ -26,6 +27,7 @@ def getQueriesList(root, language=None):
 
     return results
 
+
 class Queries:
     def __init__(
         self,
@@ -35,6 +37,7 @@ class Queries:
         databases: list = None,
         codeql: str = None,
         search_paths: list = [],
+        caching: bool = False,
     ):
         self.queries = queries
         self.languages = languages
@@ -45,9 +48,14 @@ class Queries:
         self.data = {}
 
         self.results = results
-        if not os.path.exists(self.results):
-            logging.debug("Creating results dir :: " + self.results)
-            os.makedirs(self.results)
+        self.results_log = os.path.join(self.results, "logs")
+
+        self.caching = caching
+
+    def findAndRunQuery(self, name, language=None):
+        query = self.findQuery(name)
+        results = self.runQuery(query[0], self.results)
+        return self.getResults(results)
 
     def findQuery(self, name, language=None):
         results = []
@@ -59,72 +67,118 @@ class Queries:
         return results
 
     def runQuery(self, query, output):
+        """
+
+        output: Dir of
+        """
         if self.codeql_exec is None:
             raise Exception("CodeQL binary isn't loaded")
 
+        results = {}
+
+        file_format = "{query_name}-{language}.{format}"
+
         for database in self.databases:
+            file_output_bqrs = os.path.join(
+                output,
+                file_format.format(
+                    query_name=query.get("name"),
+                    language=database.get("language"),
+                    format="bqrs",
+                ),
+            )
 
-        #    command = [
-        #        self.codeql_exec,
-        #        "database",
-        #        "analyze",
-        #        "--search-path",
-        #        self.search_paths[0],
-        #        "--format",
-        #        "csv",
-        #        "--output",
-        #        output,
-        #        database.get("path"),
-        #        query.get("path"),
-        #    ]
-            command = [
-                self.codeql_exec,
-                "query",
-                "run",
-                "--search-path",
-                self.search_paths[0],
-                "-d",
-                database.get("path"),
-                "-o",
-                "result.bqrs",
-                query.get("path"),
-            ]
+            if self.caching and os.path.exists(file_output_bqrs):
+                logging.info("Using cached copy of the query :: " + query.get("name"))
+            else:
+                # Caching disabled or doesn't exist
 
-            logging.debug("CodeQL Command :: " + str(command))
+                logging.debug("CodeQL query run Output :: " + file_output_bqrs)
 
-            print(" ".join(command))
-            # TODO: Pipe output
-            subprocess.run(command)
+                command = [
+                    self.codeql_exec,
+                    "query",
+                    "run",
+                    "--search-path",
+                    self.search_paths[0],
+                    "-d",
+                    database.get("path"),
+                    "-o",
+                    file_output_bqrs,
+                    query.get("path"),
+                ]
 
+                logging.debug("CodeQL Command :: " + str(command))
+
+                file_output_bqrs_logs = os.path.join(
+                    self.results_log,
+                    file_format.format(
+                        query_name=query.get("name"),
+                        language=database.get("language"),
+                        format="log",
+                    ),
+                )
+
+                with open(file_output_bqrs_logs, "w") as handle:
+                    subprocess.run(command, stdout=handle, stderr=handle)
+
+            # BQRS to format
+            file_output_csv = os.path.join(
+                output,
+                file_format.format(
+                    query_name=query.get("name"),
+                    language=database.get("language"),
+                    format="csv",
+                ),
+            )
             command = [
                 self.codeql_exec,
                 "bqrs",
                 "decode",
                 "--format=csv",
-                "result.bqrs"
+                "-o",
+                file_output_csv,
+                file_output_bqrs,
             ]
 
             logging.debug("CodeQL Command :: " + str(command))
 
-            print(" ".join(command))
-            # TODO: Pipe output
-            subprocess.run(command)
+            file_output_csv_logs = os.path.join(
+                self.results_log,
+                file_format.format(
+                    query_name=query.get("name"),
+                    language=database.get("language"),
+                    format="log",
+                ),
+            )
+            with open(file_output_csv_logs, "w") as handle:
+                subprocess.run(command, stdout=handle, stderr=handle)
 
-        return output
+            results[database.get("language")] = {
+                "query_name": query.get("name"),
+                "path": file_output_csv,
+            }
 
-    def runQueries(self):
-        for query_name, query_path in QUERIES.items():
-            logging.info("Loading Query :: " + query_name)
+        return results
 
-            self.data[query_name] = {}
+    def getResults(self, results):
+        # Processing Result files
+        logging.info("Process result files")
 
-            for language in self.languages:
-                query_path = self.findQueryLocation(query_path, language)
+        return_results = {}
 
-                output_path = os.path.join(
-                    self.results, language + "-" + query_name + ".csv"
-                )
+        for language, result in results.items():
 
-                self.data[query_name][language] = self.runQuery(query_path, output_path)
+            logging.debug("Processing Result file :: " + result.get("path"))
 
-        return self.data
+            # Parse CSV to results
+            with open(result.get("path"), "r") as handle_csv:
+                csv_reader = csv.DictReader(handle_csv, delimiter=",", quotechar='"')
+
+                result["results"] = []
+                for row in csv_reader:
+                    result["results"].append(row)
+
+                return_results[language] = result
+
+        return return_results

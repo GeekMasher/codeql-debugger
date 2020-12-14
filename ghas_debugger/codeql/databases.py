@@ -24,7 +24,11 @@ def getDatabases(roots: list, name: str = None):
             if name and name != database_name:
                 continue
 
+            language = "java"
+
             logging.debug("Found Database folder :: " + database_path)
-            results.append({"name": database_name, "path": database_path})
+            results.append(
+                {"name": database_name, "path": database_path, "language": language}
+            )
 
     return results
