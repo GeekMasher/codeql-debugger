@@ -5,14 +5,14 @@ import logging
 import argparse
 
 from ghas_debugger.codeql.databases import getDatabases
-from ghas_debugger.codeql.queries import Queries
+from ghas_debugger.codeql.queries import Queries, getQueriesList
 
 
 CODEQL_BINS = ["/usr/bin/codeql"]
 # CodeQL Action
 CODEQL_BINS.extend(glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/codeql"))
 
-CODEQL_SEARCH_PATH = [""]
+CODEQL_SEARCH_PATH = []
 CODEQL_SEARCH_PATH.extend(
     glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/qlpacks/")
 )
@@ -20,9 +20,6 @@ CODEQL_SEARCH_PATH.extend(
 CODEQL_DATABASE = [""]
 CODEQL_DATABASE.extend(glob.glob("/home/runner/work/_temp/codeql_databases/*"))
 
-
-# print(CODEQL_BINS)
-# exit()
 
 parser = argparse.ArgumentParser("GitHub Advance Security Debugger Action")
 parser.add_argument(
@@ -53,16 +50,21 @@ logging.info("CodeQL Search Path :: " + ",".join(CODEQL_SEARCH_PATH))
 
 # Gets a list of the CodeQL databases
 databases = getDatabases(
-    os.path.abspath((arguments.databases)), name=arguments.database_name
+    CODEQL_DATABASE, name=arguments.database_name
 )
+
+codeql_queries = getQueriesList("./queries")
+
 # Queries
 queries = Queries(
     databases=databases,
+    queries=codeql_queries,
     results="./results",
     codeql=os.path.abspath(arguments.binary),
+    search_paths=CODEQL_SEARCH_PATH,
 )
 
-# [print(loc) for loc in queries.getQueriesList()]
+# [print(loc) for loc in getQueriesList()]
 # exit()
 loc = queries.findQuery("LinesOfCode")
 queries.runQuery(loc[0], "results/test.csv")

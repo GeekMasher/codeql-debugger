@@ -3,19 +3,44 @@ import logging
 import subprocess
 
 
+def getQueriesList(root, language=None):
+    query_files = []
+
+    for dp, dn, filenames in os.walk(root):
+        for f in filenames:
+            path = os.path.join(dp, f)
+            if os.path.splitext(path)[1] == ".ql":
+                query_files.append(path)
+
+    results = []
+    for query in query_files:
+        lang = os.path.split(query.replace(root, ""))[0]
+
+        results.append(
+            {
+                "name": os.path.splitext(os.path.basename(query))[0],
+                "path": query,
+                "language": lang.replace("/", ""),
+            }
+        )
+
+    return results
+
 class Queries:
     def __init__(
         self,
         languages=[],
         results: str = None,
-        queries_path: str = None,
+        queries: list = [],
         databases: list = None,
         codeql: str = None,
+        search_paths: list = [],
     ):
-        self.queries_path = queries_path
+        self.queries = queries
         self.languages = languages
         self.codeql_exec = codeql
         self.databases = databases
+        self.search_paths = search_paths
 
         self.data = {}
 
@@ -24,35 +49,10 @@ class Queries:
             logging.debug("Creating results dir :: " + self.results)
             os.makedirs(self.results)
 
-    def getQueriesList(self, language=None):
-        query_files = [
-            os.path.join(dp, f)
-            for dp, dn, filenames in os.walk(self.queries_path)
-            for f in filenames
-            if os.path.splitext(f)[1] == ".ql"
-        ]
-
-        results = []
-        for query in query_files:
-            lang = os.path.split(query.replace(self.queries_path, ""))[0]
-
-            # if language and language != lang:
-            #     continue
-
-            results.append(
-                {
-                    "name": os.path.splitext(os.path.basename(query))[0],
-                    "path": query,
-                    "language": lang.replace("/", ""),
-                }
-            )
-
-        return results
-
     def findQuery(self, name, language=None):
         results = []
 
-        for query in self.getQueriesList(language=language):
+        for query in self.queries:
             if query.get("name") == name:
                 results.append(query)
 
@@ -68,7 +68,7 @@ class Queries:
                 "database",
                 "analyze",
                 "--search-path",
-                "./queries/",
+                self.search_paths[0],
                 "--format",
                 "csv",
                 "--output",
@@ -80,7 +80,7 @@ class Queries:
             logging.debug("CodeQL Command :: " + str(command))
 
             print(" ".join(command))
-
+            # TODO: Pipe output
             subprocess.run(command)
 
         return output
