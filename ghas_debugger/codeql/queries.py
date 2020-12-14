@@ -1,4 +1,5 @@
 import os
+import csv
 import logging
 import subprocess
 
@@ -36,6 +37,7 @@ class Queries:
         databases: list = None,
         codeql: str = None,
         search_paths: list = [],
+        caching: bool = False,
     ):
         self.queries = queries
         self.languages = languages
@@ -49,6 +51,13 @@ class Queries:
         if not os.path.exists(self.results):
             logging.debug("Creating results dir :: " + self.results)
             os.makedirs(self.results)
+
+        self.caching = caching
+
+    def findAndRunQuery(self, name, language=None):
+        query = self.findQuery(name)
+        results = self.runQuery(query[0], self.results)
+        return self.getResults(results)
 
     def findQuery(self, name, language=None):
         results = []
@@ -67,6 +76,8 @@ class Queries:
         if self.codeql_exec is None:
             raise Exception("CodeQL binary isn't loaded")
 
+        results = {}
+
         multi_language = True if len(self.databases) < 1 else False
 
         file_format = "{query_name}-{language}.{format}"
@@ -81,25 +92,30 @@ class Queries:
                 ),
             )
 
-            logging.debug("CodeQL query run Output :: " + file_output_bqrs)
+            if self.caching and os.path.exists(file_output_bqrs):
+                logging.info("Using cached copy of the query :: " + query.get('name'))
+            else:
+                # Caching disabled or doesn't exist
 
-            command = [
-                self.codeql_exec,
-                "query",
-                "run",
-                "--search-path",
-                self.search_paths[0],
-                "-d",
-                database.get("path"),
-                "-o",
-                file_output_bqrs,
-                query.get("path"),
-            ]
+                logging.debug("CodeQL query run Output :: " + file_output_bqrs)
 
-            logging.debug("CodeQL Command :: " + str(command))
+                command = [
+                    self.codeql_exec,
+                    "query",
+                    "run",
+                    "--search-path",
+                    self.search_paths[0],
+                    "-d",
+                    database.get("path"),
+                    "-o",
+                    file_output_bqrs,
+                    query.get("path"),
+                ]
 
-            with open(file_output_bqrs + ".log", "w") as handle:
-                subprocess.run(command, stdout=handle, stderr=handle)
+                logging.debug("CodeQL Command :: " + str(command))
+
+                with open(file_output_bqrs + ".log", "w") as handle:
+                    subprocess.run(command, stdout=handle, stderr=handle)
 
             # BQRS to format
             file_output_csv = os.path.join(
@@ -122,12 +138,12 @@ class Queries:
 
             logging.debug("CodeQL Command :: " + str(command))
 
-            print(" ".join(command))
-            # TODO: Pipe output
             with open(file_output_csv + ".log", "w") as handle:
                 subprocess.run(command, stdout=handle, stderr=handle)
 
-        return output
+            results[database.get("language")] = {"query_name": query.get("name"), "path": file_output_csv}
+
+        return results
 
     def runQueries(self):
         for query_name, query_path in QUERIES.items():
@@ -145,3 +161,25 @@ class Queries:
                 self.data[query_name][language] = self.runQuery(query_path, output_path)
 
         return self.data
+
+    def getResults(self, results):
+        # Processing Result files
+        logging.info('Process result files')
+
+        return_results = {}
+
+        for language, result in results.items():
+
+            logging.debug('Processing Result file :: ' + result.get('path'))
+
+            # Parse CSV to results
+            with open(result.get('path'), 'r') as handle_csv:
+                csv_reader = csv.DictReader(handle_csv, delimiter=',', quotechar='\"')
+
+                result["results"] = []
+                for row in csv_reader:
+                    result["results"].append(row)
+
+                return_results[language] = result
+
+        return return_results

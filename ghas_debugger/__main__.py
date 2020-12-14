@@ -25,10 +25,12 @@ parser = argparse.ArgumentParser("GitHub Advance Security Debugger Action")
 parser.add_argument(
     "--debug", action="store_true", default=bool(os.environ.get("DEBUG"))
 )
+parser.add_argument('--caching', action='store_true')
 
 parser.add_argument("-d", "--databases", default="codeql-db")
 parser.add_argument("-b", "--binary", default="codeql")
 parser.add_argument("-dn", "--database-name")
+parser.add_argument("-r", "--results", default=".codeql/results")
 parser.add_argument("-s", "--search-path", default="queries")
 
 arguments = parser.parse_args()
@@ -60,15 +62,31 @@ queries = Queries(
     results="./results",
     codeql=os.path.abspath(arguments.binary),
     search_paths=CODEQL_SEARCH_PATH,
+    caching=arguments.caching
 )
 
-# [print(loc) for loc in getQueriesList()]
-# exit()
-loc = queries.findQuery("LinesOfCode")
-queries.runQuery(loc[0], "results")
-print(loc)
+
+METADATA = {
+    "stasistics": {
+        "loc": queries.findAndRunQuery("LinesOfCode"),
+        # "comments": queries.findAndRunQuery("LinesOfComment")
+    },
+    "diagnostics": {
+        "full":  queries.findAndRunQuery("Diagnostics"),
+        "summary": queries.findAndRunQuery("DiagnosticsSummary"),
+    }
+}
+
+# res = {
+#     "java": {
+#         "query_name": "LinesOfCode",
+#         "path": "./results/LinesOfCode-java.csv"
+#     }
+# }
+# METADATA = queries.getResults(res)
 
 
 # data = buildMetadata(arguments)
-
-# print(json.dumps(data, indent=2))
+print('='*32)
+# with 
+print(json.dumps(METADATA, indent=2))
