@@ -19,7 +19,7 @@ def getQueriesList(root, language=None):
         results.append(
             {
                 "name": os.path.splitext(os.path.basename(query))[0],
-                "path": query,
+                "path": os.path.abspath(query),
                 "language": lang.replace("/", ""),
             }
         )
