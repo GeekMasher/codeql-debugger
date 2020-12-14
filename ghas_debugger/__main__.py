@@ -36,9 +36,9 @@ parser.add_argument("-s", "--search-path", default="queries")
 
 arguments = parser.parse_args()
 
-CODEQL_BINS.append(arguments.binary)
-CODEQL_DATABASE.append(arguments.database)
-CODEQL_SEARCH_PATH.append(arguments.search_path)
+CODEQL_BINS.append(os.path.abspath(arguments.binary))
+CODEQL_DATABASE.append(os.path.abspath(arguments.databases))
+CODEQL_SEARCH_PATH.append(os.path.abspath(arguments.search_path))
 
 # Logging
 logging.basicConfig(
@@ -47,9 +47,9 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-logging.info("CodeQL Databases :: " + os.path.abspath(arguments.databases))
-logging.info("CodeQL Binary :: " + os.path.abspath(arguments.binary))
-logging.info("CodeQL Search Path :: " + arguments.search_path)
+logging.info("CodeQL Databases :: " + ",".join(CODEQL_DATABASE))
+logging.info("CodeQL Binary :: " + ",".join(CODEQL_BINS))
+logging.info("CodeQL Search Path :: " + ",".join(CODEQL_SEARCH_PATH))
 
 # Gets a list of the CodeQL databases
 databases = getDatabases(
