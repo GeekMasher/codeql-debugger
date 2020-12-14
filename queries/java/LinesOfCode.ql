@@ -5,7 +5,4 @@
 import java
 
 // https://github.com/github/codeql/blob/main/java/ql/src/Metrics/Files/FLinesOfCode.ql
-
-from File f, int n
-where n = f.getNumberOfLinesOfCode()
-select f, n order by n desc
+select sum(File f | any() | f.getNumberOfLinesOfCode())
