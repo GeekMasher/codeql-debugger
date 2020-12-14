@@ -1,4 +1,3 @@
-
 import os
 import logging
 
@@ -12,12 +11,12 @@ def getDatabases(root, name=None):
         if not os.path.isdir(database_path):
             continue
 
-        # TODO: More testing 
+        # TODO: More testing
 
-        logging.debug('Found Database folder :: ' + database_path)
-        results.append({
-            "name": database_name,
-            "path": database_path
-        })
+        if name and name != database_name:
+            continue
+
+        logging.debug("Found Database folder :: " + database_path)
+        results.append({"name": database_name, "path": database_path})
 
     return results

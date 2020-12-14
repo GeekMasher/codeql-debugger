@@ -2,18 +2,15 @@ import os
 import logging
 import subprocess
 
-QUERIES_PATH = os.path.join(os.getcwd(), "queries")
-RESULTS_PATH = os.path.join(os.getcwd(), "results")
-
 
 class Queries:
     def __init__(
         self,
         languages=[],
-        results: str = RESULTS_PATH,
-        queries_path: str = QUERIES_PATH,
+        results: str = None,
+        queries_path: str = None,
         databases: list = None,
-        codeql: str = None
+        codeql: str = None,
     ):
         self.queries_path = queries_path
         self.languages = languages
@@ -28,20 +25,27 @@ class Queries:
             os.makedirs(self.results)
 
     def getQueriesList(self, language=None):
-        query_files = [os.path.join(dp, f) for dp, dn, filenames in os.walk(self.queries_path) for f in filenames if os.path.splitext(f)[1] == '.ql']
+        query_files = [
+            os.path.join(dp, f)
+            for dp, dn, filenames in os.walk(self.queries_path)
+            for f in filenames
+            if os.path.splitext(f)[1] == ".ql"
+        ]
 
         results = []
         for query in query_files:
-            lang = os.path.split(query.replace(self.queries_path, ''))[0]
+            lang = os.path.split(query.replace(self.queries_path, ""))[0]
 
             # if language and language != lang:
             #     continue
 
-            results.append({
-                "name": os.path.splitext(os.path.basename(query))[0],
-                "path": query,
-                "language": lang.replace('/', '')
-            })
+            results.append(
+                {
+                    "name": os.path.splitext(os.path.basename(query))[0],
+                    "path": query,
+                    "language": lang.replace("/", ""),
+                }
+            )
 
         return results
 
@@ -49,7 +53,7 @@ class Queries:
         results = []
 
         for query in self.getQueriesList(language=language):
-            if query.get('name') == name:
+            if query.get("name") == name:
                 results.append(query)
 
         return results
@@ -60,19 +64,24 @@ class Queries:
 
         for database in self.databases:
             command = [
-                self.codeql_exec, "database", "analyze",
-                '--search-path', './queries/',
-                '--format', 'csv',
-                '--output', output,
-                database.get('path'),
-                query.get('path')
+                self.codeql_exec,
+                "database",
+                "analyze",
+                "--search-path",
+                "./queries/",
+                "--format",
+                "csv",
+                "--output",
+                output,
+                database.get("path"),
+                query.get("path"),
             ]
 
             logging.debug("CodeQL Command :: " + str(command))
 
-            print(' '.join(command))
+            print(" ".join(command))
 
-            # subprocess.run(command)
+            subprocess.run(command)
 
         return output
 

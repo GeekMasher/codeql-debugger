@@ -1,4 +1,3 @@
-
 import logging
 
 from ghas_debugger.codeql.queries import Queries
@@ -9,11 +8,11 @@ def getLanguages():
 
 
 def buildMetadata(arguments):
-    logging.debug('Building metadata...')
+    logging.debug("Building metadata...")
     queries = Queries(
         languages=getLanguages(),
         database=arguments.database,
-        codeql_bin=arguments.binary
+        codeql_bin=arguments.binary,
     )
 
     queries_outputs = queries.runQueries()
