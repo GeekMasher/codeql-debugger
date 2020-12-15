@@ -172,9 +172,10 @@ class Queries:
                 subprocess.run(command, stdout=handle, stderr=handle)
 
             if not os.path.exists(file_output_bqrs):
-                error_msg = "BQRS file does not exist"
-                logging.error(error_msg)
-                raise Exception("error_msg")
+                logging.error("BQRS file does not exist")
+                with open(file_output_bqrs_logs, 'r') as handle:
+                    logging.error(handle.read())
+                raise Exception("BQRS file does not exist")
 
         # BQRS to format
         file_output_csv = os.path.join(

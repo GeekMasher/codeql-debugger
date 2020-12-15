@@ -27,10 +27,10 @@ CODEQL_BINS = [
 # CodeQL Action
 CODEQL_BINS.extend(glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/codeql"))
 
-CODEQL_SEARCH_PATH = [
+CODEQL_SEARCH_PATHS = [
     ".codeql/bin/codeql/qlpacks"
 ]
-CODEQL_SEARCH_PATH.extend(
+CODEQL_SEARCH_PATHS.extend(
     glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/qlpacks/")
 )
 
@@ -62,7 +62,7 @@ arguments = parser.parse_args()
 
 CODEQL_BINS.append(os.path.abspath(arguments.binary))
 CODEQL_DATABASE.append(os.path.abspath(arguments.databases))
-CODEQL_SEARCH_PATH.append(os.path.abspath(arguments.search_path))
+CODEQL_SEARCH_PATHS.append(os.path.abspath(arguments.search_path))
 
 # Logging
 logging.basicConfig(
@@ -73,7 +73,7 @@ logging.basicConfig(
 
 logging.info("CodeQL Databases :: " + ",".join(CODEQL_DATABASE))
 logging.info("CodeQL Binary :: " + ",".join(CODEQL_BINS))
-logging.info("CodeQL Search Path :: " + ",".join(CODEQL_SEARCH_PATH))
+logging.info("CodeQL Search Path :: " + ",".join(CODEQL_SEARCH_PATHS))
 
 if not arguments.caching:
     logging.debug("Caching disabled")
@@ -88,6 +88,15 @@ for binary in CODEQL_BINS:
     if os.path.exists(binary):
         logging.info("Found CodeQL CLI :: " + binary)
         CODEQL_BIN = binary
+        break
+
+# Binaries
+CODEQL_SEARCH_PATH = ""
+for search_path in CODEQL_SEARCH_PATHS:
+    search_path = os.path.abspath(search_path)
+    if os.path.exists(search_path):
+        logging.info("Found CodeQL QL Suite :: " + search_path)
+        CODEQL_SEARCH_PATH = search_path
         break
 
 # Gets a list of the CodeQL databases
@@ -120,6 +129,13 @@ logging.debug("Path - Results Artifacts :: " + queries.results_artifacts)
 os.makedirs(queries.results_artifacts, exist_ok=True)
 
 
+METADATA = {
+    "issues": {
+        "errors": [],
+        "warnings": []
+    },
+}
+
 # Load cached copy if enabled
 if arguments.caching and os.path.exists(result_outout):
     logging.info("Loading cached copy of the results")
@@ -128,29 +144,36 @@ if arguments.caching and os.path.exists(result_outout):
 
 else:
     logging.debug("Building metadata object")
-    METADATA = {
-        "repository": getRepository(),
-        "issues": {
-            "errors": [],
-            "warnings": []
-        },
-        "statistics": {
-            "loc": queries.findAndRunQuery("LinesOfCode"),
-            "comments": queries.findAndRunQuery("LinesOfComment"),
-            # "extensions": queries.findAndRunQuery("FileExtensions"),
-        },
-        "analysis": {
-            "sources": queries.findAndRunQuery("RemoteFlowSources"),
-            "sinks": {},
-            "sinks_db": queries.findAndRunQuery("SqlSinks"),
-            "sinks_xxs": queries.findAndRunQuery("XssSinks"),
-            "sinks_external": {},
-        },
-        "diagnostics": {
-            "full": queries.findAndRunQuery("Diagnostics"),
-            "summary": queries.findAndRunQuery("DiagnosticsSummary"),
-        },
-    }
+    try:
+        METADATA = {
+            "repository": getRepository(),
+            "issues": {
+                "errors": [],
+                "warnings": []
+            },
+            "statistics": {
+                "loc": queries.findAndRunQuery("LinesOfCode"),
+                "comments": queries.findAndRunQuery("LinesOfComment"),
+                # "extensions": queries.findAndRunQuery("FileExtensions"),
+            },
+            "analysis": {
+                "sources": queries.findAndRunQuery("RemoteFlowSources"),
+                "sinks": {},
+                "sinks_db": queries.findAndRunQuery("SqlSinks"),
+                "sinks_xxs": queries.findAndRunQuery("XssSinks"),
+                "sinks_external": {},
+            },
+            "diagnostics": {
+                "full": queries.findAndRunQuery("Diagnostics"),
+                "summary": queries.findAndRunQuery("DiagnosticsSummary"),
+            },
+        }
+
+    except Exception as error:
+        METADATA['issues']['errors'].append({
+                "msg": str(error),
+                "data": ""
+            })
 
     # METADATA["extensions"] = {}
     # feresults = (queries.findAndRunQuery("FileExtensions"),)
