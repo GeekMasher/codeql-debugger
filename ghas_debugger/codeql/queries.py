@@ -6,20 +6,26 @@ import subprocess
 from os.path import join, splitext
 
 
-def file_suffixes(d):
+def repo_extensions(d):
     extensions = {}
     for root, dirs, files in os.walk(d):
-        dirs[:] = [d for d in dirs if d != ".git"]
+        dirs[:] = [d for d in dirs if d != '.git']
         for f in files:
             filepath = join(root, f)
             _, ext = splitext(filepath)
-            if not ext in extensions:
-                extensions[ext] = 0
-            extensions[ext] = extensions[ext] + 1
-
-    extensions = list(extensions.items())
-    extensions.sort(key=lambda i: i[1], reverse=True)
+            ext = ext[1:]
+            extensions[ext] = extensions.get(ext, 0) + 1
     return extensions
+
+
+def compare_extensions(ondisk, indb):
+    result = {}
+    for ext in ondisk:
+        result[ext] = (ondisk[ext], indb.get(ext, 0))
+
+    result = list(result.items())
+    result.sort(key = lambda i: i[1], reverse=True)
+    return result
 
 
 def getQueriesList(root, language=None):
