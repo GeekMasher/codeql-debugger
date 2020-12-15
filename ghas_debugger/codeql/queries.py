@@ -9,7 +9,7 @@ from os.path import join, splitext
 def repo_extensions(d):
     extensions = {}
     for root, dirs, files in os.walk(d):
-        dirs[:] = [d for d in dirs if d != '.git']
+        dirs[:] = [d for d in dirs if d != ".git"]
         for f in files:
             filepath = join(root, f)
             _, ext = splitext(filepath)
@@ -24,7 +24,7 @@ def compare_extensions(ondisk, indb):
         result[ext] = (ondisk[ext], indb.get(ext, 0))
 
     result = list(result.items())
-    result.sort(key = lambda i: i[1], reverse=True)
+    result.sort(key=lambda i: i[1], reverse=True)
     return result
 
 
