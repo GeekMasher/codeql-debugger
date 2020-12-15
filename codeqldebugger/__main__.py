@@ -177,10 +177,10 @@ if not databases:
 
 
 # Print out the metadat / results.json
-# if arguments.debug:
-    # print("=" * 32)
-    # print(json.dumps(METADATA, indent=2))
-    # print("=" * 32)
+if arguments.debug and arguments.verbose:
+    print("=" * 32)
+    print(json.dumps(METADATA, indent=2))
+    print("=" * 32)
 
 
 logging.info("Writing results output file :: " + result_outout)
