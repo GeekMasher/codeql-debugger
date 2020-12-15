@@ -53,6 +53,9 @@ logging.info("CodeQL Databases :: " + ",".join(CODEQL_DATABASE))
 logging.info("CodeQL Binary :: " + ",".join(CODEQL_BINS))
 logging.info("CodeQL Search Path :: " + ",".join(CODEQL_SEARCH_PATH))
 
+if not arguments.caching:
+    logging.debug("Caching disabled")
+
 # Default: Result.json
 result_outout = os.path.join(arguments.results, arguments.output)
 
@@ -84,14 +87,14 @@ if not os.path.exists(queries.results_artifacts):
     logging.debug("Creating results artifacts dir :: " + queries.results_artifacts)
     os.makedirs(queries.results_artifacts)
 
-
+# Load cached copy if enabled
 if arguments.caching and os.path.exists(result_outout):
-    # Load cached copy if enabled
     logging.info("Loading cached copy of the results")
     with open(result_outout, "r") as handle:
         METADATA = json.load(handle)
 
 else:
+    logging.debug("Building metadata object")
     METADATA = {
         "repository": getRepository(),
         "statistics": {
@@ -107,11 +110,12 @@ else:
     }
 
 
-# data = buildMetadata(arguments)
+# Print out the metadat / results.json
 if arguments.debug:
     print("=" * 32)
     print(json.dumps(METADATA, indent=2))
     print("=" * 32)
+
 
 logging.info("Writing results output file :: " + result_outout)
 
