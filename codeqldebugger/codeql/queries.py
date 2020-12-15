@@ -69,14 +69,14 @@ class Queries:
         queries: list = [],
         databases: list = None,
         codeql: str = None,
-        search_paths: list = [],
+        search_path: list = [],
         caching: bool = False,
     ):
         self.queries = queries
         self.languages = languages
         self.codeql_exec = codeql
         self.databases = databases
-        self.search_paths = search_paths
+        self.search_path = search_path
 
         self.data = {}
 
@@ -149,7 +149,7 @@ class Queries:
                 "query",
                 "run",
                 "--search-path",
-                self.search_paths[0],
+                self.search_path,
                 "-d",
                 database.get("path"),
                 "-o",

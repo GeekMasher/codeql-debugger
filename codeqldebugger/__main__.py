@@ -114,7 +114,7 @@ queries = Queries(
     queries=codeql_queries,
     results=arguments.results,
     codeql=CODEQL_BIN,
-    search_paths=CODEQL_SEARCH_PATH,
+    search_path=CODEQL_SEARCH_PATH,
     caching=arguments.caching,
 )
 
