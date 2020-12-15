@@ -30,7 +30,7 @@ CODEQL_SEARCH_PATH.extend(
 )
 
 CODEQL_DATABASE = []
-CODEQL_DATABASE.extend(glob.glob("/home/runner/work/_temp/codeql_databases/*"))
+CODEQL_DATABASE.extend("/home/runner/work/_temp/codeql_databases/")
 
 
 parser = argparse.ArgumentParser("GitHub Advance Security Debugger Action")
@@ -114,7 +114,13 @@ else:
             "comments": queries.findAndRunQuery("LinesOfComment"),
             # "extensions": queries.findAndRunQuery("FileExtensions"),
         },
-        "analysis": {"sources": {}, "sinks": {}, "sinks_db": {}, "sinks_external": {}},
+        "analysis": {
+            "sources": queries.findAndRunQuery("RemoteFlowSources"),
+            "sinks": {},
+            "sinks_db": {},
+            "sinks_xxs": queries.findAndRunQuery("XssSinks"),
+            "sinks_external": {},
+        },
         "diagnostics": {
             "full": queries.findAndRunQuery("Diagnostics"),
             "summary": queries.findAndRunQuery("DiagnosticsSummary"),
