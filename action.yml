@@ -1,0 +1,17 @@
+# action.yml
+name: 'CodeQL Debugger'
+description: 'GitHub Advance Security CodeQL Debugger Action'
+author: GeekMasher
+
+inputs:
+  databases:
+    description: 'CodeQL Database Folder Location'
+  database_name:
+    description: 'CodeQL Database Name (default: all)'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - -d ${{ inputs.databases }}
+    - -dn ${{ inputs.database_name }}
