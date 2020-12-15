@@ -29,7 +29,9 @@ CODEQL_SEARCH_PATH.extend(
     glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/qlpacks/")
 )
 
-CODEQL_DATABASE = []
+CODEQL_DATABASE = [
+    ".codeql/db"
+]
 CODEQL_DATABASE.extend(
     glob.glob("/home/runner/work/_temp/codeql_databases/*")
 )
@@ -41,7 +43,7 @@ parser.add_argument(
 )
 parser.add_argument("--caching", action="store_true")
 
-parser.add_argument("-d", "--databases", default=".codeql/db")
+parser.add_argument("-d", "--databases", default="")
 parser.add_argument("-b", "--binary", default="codeql")
 parser.add_argument("-dn", "--database-name")
 parser.add_argument("-r", "--results", default=".codeql/results")
@@ -73,8 +75,6 @@ result_outout = os.path.join(arguments.results, arguments.output)
 
 # Gets a list of the CodeQL databases
 databases = getDatabases(CODEQL_DATABASE, name=arguments.database_name)
-if not databases:
-    raise Exception("No CodeQL Databases were present...")
 
 codeql_queries = getQueriesList("./queries", "/codeql-debugger/queries")
 
@@ -111,6 +111,10 @@ else:
     logging.debug("Building metadata object")
     METADATA = {
         "repository": getRepository(),
+        "issues": {
+            "errors": [],
+            "warnings": []
+        },
         "statistics": {
             "loc": queries.findAndRunQuery("LinesOfCode"),
             "comments": queries.findAndRunQuery("LinesOfComment"),
@@ -142,6 +146,13 @@ else:
     #         for i in compare_extensions(repo_exts, db_exts)
     #     ]
     #     METADATA["extensions"][list(lang.keys())[0]] = r
+
+
+if not databases:
+    METADATA['issues']['errors'].append({
+        "msg": "No Databases could be found on system.",
+        "data": ""
+    })
 
 
 # Print out the metadat / results.json
