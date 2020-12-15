@@ -1,5 +1,6 @@
 import os
 import csv
+import json
 import logging
 import subprocess
 from os.path import join, splitext
@@ -8,7 +9,7 @@ from os.path import join, splitext
 def file_suffixes(d):
     extensions = {}
     for root, dirs, files in os.walk(d):
-        dirs[:] = [d for d in dirs if d != '.git']
+        dirs[:] = [d for d in dirs if d != ".git"]
         for f in files:
             filepath = join(root, f)
             _, ext = splitext(filepath)
@@ -17,7 +18,7 @@ def file_suffixes(d):
             extensions[ext] = extensions[ext] + 1
 
     extensions = list(extensions.items())
-    extensions.sort(key = lambda i: i[1], reverse=True)
+    extensions.sort(key=lambda i: i[1], reverse=True)
     return extensions
 
 
@@ -71,11 +72,21 @@ class Queries:
         self.caching = caching
 
     def findAndRunQuery(self, name, language=None):
-        query = self.findQuery(name)
-        results = self.runQuery(query[0], self.results)
+        results = {}
+        logging.info("Running query on CodeQL DB :: " + name)
+
+        for database in self.databases:
+            logging.debug("Loading database :: " + database.get("name"))
+            for query in self.findQueries(name, database.get("language")):
+                result = self.runQuery(query, database, self.results)
+
+                results[database.get("language")] = result
+
+        # print(json.dumps(results, indent=2))
+
         return self.getResults(results)
 
-    def findQuery(self, name, language=None):
+    def findQueries(self, name, language=None):
         results = []
 
         for query in self.queries:
@@ -84,7 +95,7 @@ class Queries:
 
         return results
 
-    def runQuery(self, query, output):
+    def runQuery(self, query, database, output):
         """
 
         output: Dir of
@@ -92,76 +103,42 @@ class Queries:
         if self.codeql_exec is None:
             raise Exception("CodeQL binary isn't loaded")
 
-        results = {}
+        result = {}
 
         file_format = "{query_name}-{language}.{format}"
 
-        for database in self.databases:
-            file_output_bqrs = os.path.join(
-                self.results_artifacts,
-                file_format.format(
-                    query_name=query.get("name"),
-                    language=database.get("language"),
-                    format="bqrs",
-                ),
-            )
+        file_output_bqrs = os.path.join(
+            self.results_artifacts,
+            file_format.format(
+                query_name=query.get("name"),
+                language=database.get("language"),
+                format="bqrs",
+            ),
+        )
 
-            if self.caching and os.path.exists(file_output_bqrs):
-                logging.info("Using cached copy of the query :: " + query.get("name"))
-            else:
-                # Caching disabled or doesn't exist
+        if self.caching and os.path.exists(file_output_bqrs):
+            logging.info("Using cached copy of the query :: " + query.get("name"))
+        else:
+            # Caching disabled or doesn't exist
 
-                logging.debug("CodeQL query run Output :: " + file_output_bqrs)
+            logging.debug("CodeQL query run Output :: " + file_output_bqrs)
 
-                command = [
-                    self.codeql_exec,
-                    "query",
-                    "run",
-                    "--search-path",
-                    self.search_paths[0],
-                    "-d",
-                    database.get("path"),
-                    "-o",
-                    file_output_bqrs,
-                    query.get("path"),
-                ]
-
-                logging.debug("CodeQL Command :: " + str(command))
-
-                file_output_bqrs_logs = os.path.join(
-                    self.results_log,
-                    file_format.format(
-                        query_name=query.get("name"),
-                        language=database.get("language"),
-                        format="log",
-                    ),
-                )
-
-                with open(file_output_bqrs_logs, "w") as handle:
-                    subprocess.run(command, stdout=handle, stderr=handle)
-
-            # BQRS to format
-            file_output_csv = os.path.join(
-                self.results_artifacts,
-                file_format.format(
-                    query_name=query.get("name"),
-                    language=database.get("language"),
-                    format="csv",
-                ),
-            )
             command = [
                 self.codeql_exec,
-                "bqrs",
-                "decode",
-                "--format=csv",
+                "query",
+                "run",
+                "--search-path",
+                self.search_paths[0],
+                "-d",
+                database.get("path"),
                 "-o",
-                file_output_csv,
                 file_output_bqrs,
+                query.get("path"),
             ]
 
             logging.debug("CodeQL Command :: " + str(command))
 
-            file_output_csv_logs = os.path.join(
+            file_output_bqrs_logs = os.path.join(
                 self.results_log,
                 file_format.format(
                     query_name=query.get("name"),
@@ -169,15 +146,48 @@ class Queries:
                     format="log",
                 ),
             )
-            with open(file_output_csv_logs, "w") as handle:
+
+            with open(file_output_bqrs_logs, "w") as handle:
                 subprocess.run(command, stdout=handle, stderr=handle)
 
-            results[database.get("language")] = {
-                "query_name": query.get("name"),
-                "path": file_output_csv,
-            }
+        # BQRS to format
+        file_output_csv = os.path.join(
+            self.results_artifacts,
+            file_format.format(
+                query_name=query.get("name"),
+                language=database.get("language"),
+                format="csv",
+            ),
+        )
+        command = [
+            self.codeql_exec,
+            "bqrs",
+            "decode",
+            "--format=csv",
+            "-o",
+            file_output_csv,
+            file_output_bqrs,
+        ]
 
-        return results
+        logging.debug("CodeQL Command :: " + str(command))
+
+        file_output_csv_logs = os.path.join(
+            self.results_log,
+            file_format.format(
+                query_name=query.get("name"),
+                language=database.get("language"),
+                format="log",
+            ),
+        )
+        with open(file_output_csv_logs, "w") as handle:
+            subprocess.run(command, stdout=handle, stderr=handle)
+
+        result = {
+            "query_name": query.get("name"),
+            "path": file_output_csv,
+        }
+
+        return result
 
     def getResults(self, results):
         # Processing Result files
