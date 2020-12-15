@@ -1,0 +1,40 @@
+{% if diagnostics %}
+<h3 id="codeql-parsing">CodeQL Parsing Issues/Errors</h3>
+<br />
+
+<table class="table text-left">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Language</th>
+            <th scope="col">Query Count</th>
+            <th scope="col" class="text-center">Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for language, diagnostic in diagnostics.get('summary', {}).items() %}
+        {% for result in diagnostic.get('results', []) %}
+        {% set severity = result.get('severity')|int %}
+        <tr>
+            {% if severity >= 8 %}
+            <td>Error(s)</td>
+            <td>{{ language }}</td>
+            <td>{{ result.get('numFiles') }}</td>
+            <td class="text-right"><button type="button" class="btn btn-outline-warning">Errors</button></td>
+            {% elif severity >= 3 %}
+            <td>Warning(s)</td>
+            <td>{{ language }}</td>
+            <td>{{ result.get('numFiles') }}</td>
+            <td class="text-right"><button type="button" class="btn btn-outline-warning">Warning</button></td>
+            {% else %}
+            <td>Note(s)/No Issues</td>
+            <td>{{ language }}</td>
+            <td>{{ result.get('numFiles') }}</td>
+            <td class="text-right"><button type="button" class="btn btn-outline-success">Success</button></td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
