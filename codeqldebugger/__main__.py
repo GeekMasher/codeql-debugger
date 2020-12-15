@@ -110,17 +110,15 @@ queries = Queries(
 )
 
 # Create result dirs
-if not os.path.exists(arguments.results):
-    logging.debug("Creating results dir :: " + arguments.results)
-    os.makedirs(arguments.results)
+logging.debug("Path - Results :: " + arguments.results)
+os.makedirs(arguments.results, exist_ok=True)
 
-if not os.path.exists(queries.results_log):
-    logging.debug("Creating results logs dir :: " + queries.results_log)
-    os.makedirs(queries.results_log)
+logging.debug("Path - Log Files :: " + queries.results_log)
+os.makedirs(queries.results_log, exist_ok=True)
 
-if not os.path.exists(queries.results_artifacts):
-    logging.debug("Creating results artifacts dir :: " + queries.results_artifacts)
-    os.makedirs(queries.results_artifacts)
+logging.debug("Path - Results Artifacts :: " + queries.results_artifacts)
+os.makedirs(queries.results_artifacts, exist_ok=True)
+
 
 # Load cached copy if enabled
 if arguments.caching and os.path.exists(result_outout):
