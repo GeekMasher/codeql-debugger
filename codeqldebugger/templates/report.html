@@ -43,12 +43,12 @@
           <td>{{ analysis.get('sources',{}).get('java',{}).get('results',[{}])[0].get('col0','NA') }}</td>
         </tr>
         <tr>
-          <td>Sinks (XSS)</td>
-          <td>{{ analysis.get('sinks_sql',{}).get('java',{}).get('results',[{}])[0].get('col0','NA') }}</td>
+          <td>Sinks (Databases)</td>
+          <td>{{ analysis.get('sinks_db',{}).get('java',{}).get('results',[{}])[0].get('col0','NA') }}</td>
         </tr>
         <tr>
-          <td>Lines of Code (parsed, CodeQL)</td>
-          <td>{{ statistics.get('sinks_xss',{}).get('java',{}).get('results',[{}])[0].get('col0','NA') }}</td>
+          <td>Sinks (XSS)</td>
+          <td>{{ analysis.get('sinks_xss',{}).get('java',{}).get('results',[{}])[0].get('col0','NA') }}</td>
         </tr>
       </tbody>
     </table>
