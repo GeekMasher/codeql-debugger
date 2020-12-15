@@ -1,4 +1,5 @@
 import os
+import glob
 import logging
 
 
@@ -20,11 +21,18 @@ def getDatabases(roots: list, name: str = None):
                 continue
 
             # TODO: More testing
+            codeql_db_yml = os.path.join(database_path, "codeql-database.yml")
+            if not os.path.exists(codeql_db_yml):
+                logging.debug("CodeQL Database yml file not present")
+                continue
 
+            # Filter if name supplied
             if name and name != database_name:
                 continue
 
-            language = "java"
+            db_paths = os.path.basename(glob.glob(database_path + "/db-*")[0])
+            language = db_paths.replace("db-", "")
+            logging.debug("CodeQL Database Language :: " + language)
 
             logging.debug("Found Database folder :: " + database_path)
             results.append(
