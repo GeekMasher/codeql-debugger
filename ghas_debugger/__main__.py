@@ -6,6 +6,8 @@ import argparse
 
 from ghas_debugger.codeql.databases import getDatabases
 from ghas_debugger.codeql.queries import Queries, getQueriesList
+from ghas_debugger.repository import getRepository
+from ghas_debugger.ghas_render import render
 
 
 CODEQL_BINS = ["/usr/bin/codeql"]
@@ -32,6 +34,7 @@ parser.add_argument("-b", "--binary", default="codeql")
 parser.add_argument("-dn", "--database-name")
 parser.add_argument("-r", "--results", default=".codeql/results")
 parser.add_argument("-s", "--search-path", default="queries")
+parser.add_argument("-o", "--output", default="results.json")
 
 arguments = parser.parse_args()
 
@@ -49,6 +52,9 @@ logging.basicConfig(
 logging.info("CodeQL Databases :: " + ",".join(CODEQL_DATABASE))
 logging.info("CodeQL Binary :: " + ",".join(CODEQL_BINS))
 logging.info("CodeQL Search Path :: " + ",".join(CODEQL_SEARCH_PATH))
+
+# Default: Result.json
+result_outout = os.path.join(arguments.results, arguments.output)
 
 # Gets a list of the CodeQL databases
 databases = getDatabases(CODEQL_DATABASE, name=arguments.database_name)
@@ -74,20 +80,44 @@ if not os.path.exists(queries.results_log):
     logging.debug("Creating results logs dir :: " + queries.results_log)
     os.makedirs(queries.results_log)
 
+if not os.path.exists(queries.results_artifacts):
+    logging.debug("Creating results artifacts dir :: " + queries.results_artifacts)
+    os.makedirs(queries.results_artifacts)
 
-METADATA = {
-    "stasistics": {
-        "loc": queries.findAndRunQuery("LinesOfCode"),
-        # "comments": queries.findAndRunQuery("LinesOfComment")
-    },
-    "diagnostics": {
-        "full": queries.findAndRunQuery("Diagnostics"),
-        "summary": queries.findAndRunQuery("DiagnosticsSummary"),
-    },
-}
+
+if arguments.caching and os.path.exists(result_outout):
+    # Load cached copy if enabled
+    logging.info("Loading cached copy of the results")
+    with open(result_outout, "r") as handle:
+        METADATA = json.load(handle)
+
+else:
+    METADATA = {
+        "repository": getRepository(),
+        "statistics": {
+            "loc": queries.findAndRunQuery("LinesOfCode"),
+            "comments": queries.findAndRunQuery("LinesOfComment"),
+            # "extensions": queries.findAndRunQuery("FileExtensions"),
+        },
+        "analysis": {"sources": {}, "sinks": {}, "sinks_db": {}, "sinks_external": {}},
+        "diagnostics": {
+            "full": queries.findAndRunQuery("Diagnostics"),
+            "summary": queries.findAndRunQuery("DiagnosticsSummary"),
+        },
+    }
 
 
 # data = buildMetadata(arguments)
-print("=" * 32)
-# with
-print(json.dumps(METADATA, indent=2))
+if arguments.debug:
+    print("=" * 32)
+    print(json.dumps(METADATA, indent=2))
+    print("=" * 32)
+
+logging.info("Writing results output file :: " + result_outout)
+
+with open(result_outout, "w") as handle:
+    json.dump(METADATA, handle, indent=2)
+
+logging.debug("Results written to storage")
+
+render(METADATA, "result.html")
