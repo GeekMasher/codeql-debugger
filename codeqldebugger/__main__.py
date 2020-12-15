@@ -27,7 +27,9 @@ CODEQL_BINS = [
 # CodeQL Action
 CODEQL_BINS.extend(glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/codeql"))
 
-CODEQL_SEARCH_PATH = []
+CODEQL_SEARCH_PATH = [
+    ".codeql/bin/codeql/qlpacks"
+]
 CODEQL_SEARCH_PATH.extend(
     glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/qlpacks/")
 )
