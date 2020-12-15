@@ -1,5 +1,7 @@
 FROM python:alpine
 
+VOLUME [ "/opt/hostedtoolcache/", "/home/runner/work/_temp/codeql_databases" ]
+
 WORKDIR /codeql-debugger
 
 RUN apk update && \
