@@ -29,8 +29,9 @@ CODEQL_SEARCH_PATH.extend(
     glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/qlpacks/")
 )
 
-CODEQL_DATABASE = []
-CODEQL_DATABASE.extend("/home/runner/work/_temp/codeql_databases/")
+CODEQL_DATABASE = [
+    "/home/runner/work/_temp/codeql_databases/"
+]
 
 
 parser = argparse.ArgumentParser("GitHub Advance Security Debugger Action")
@@ -117,7 +118,7 @@ else:
         "analysis": {
             "sources": queries.findAndRunQuery("RemoteFlowSources"),
             "sinks": {},
-            "sinks_db": {},
+            "sinks_db": queries.findAndRunQuery("SqlSinks"),
             "sinks_xxs": queries.findAndRunQuery("XssSinks"),
             "sinks_external": {},
         },
