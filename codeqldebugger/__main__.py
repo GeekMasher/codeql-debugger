@@ -129,13 +129,6 @@ logging.debug("Path - Results Artifacts :: " + queries.results_artifacts)
 os.makedirs(queries.results_artifacts, exist_ok=True)
 
 
-METADATA = {
-    "issues": {
-        "errors": [],
-        "warnings": []
-    },
-}
-
 # Load cached copy if enabled
 if arguments.caching and os.path.exists(result_outout):
     logging.info("Loading cached copy of the results")
@@ -144,36 +137,30 @@ if arguments.caching and os.path.exists(result_outout):
 
 else:
     logging.debug("Building metadata object")
-    try:
-        METADATA = {
-            "repository": getRepository(),
-            "issues": {
-                "errors": [],
-                "warnings": []
-            },
-            "statistics": {
-                "loc": queries.findAndRunQuery("LinesOfCode"),
-                "comments": queries.findAndRunQuery("LinesOfComment"),
-                # "extensions": queries.findAndRunQuery("FileExtensions"),
-            },
-            "analysis": {
-                "sources": queries.findAndRunQuery("RemoteFlowSources"),
-                "sinks": {},
-                "sinks_db": queries.findAndRunQuery("SqlSinks"),
-                "sinks_xxs": queries.findAndRunQuery("XssSinks"),
-                "sinks_external": {},
-            },
-            "diagnostics": {
-                "full": queries.findAndRunQuery("Diagnostics"),
-                "summary": queries.findAndRunQuery("DiagnosticsSummary"),
-            },
-        }
 
-    except Exception as error:
-        METADATA['issues']['errors'].append({
-                "msg": str(error),
-                "data": ""
-            })
+    METADATA = {
+        "repository": getRepository(),
+        "issues": {
+            "errors": [],
+            "warnings": []
+        },
+        "statistics": {
+            "loc": queries.findAndRunQuery("LinesOfCode"),
+            "comments": queries.findAndRunQuery("LinesOfComment"),
+            # "extensions": queries.findAndRunQuery("FileExtensions"),
+        },
+        "analysis": {
+            "sources": queries.findAndRunQuery("RemoteFlowSources"),
+            "sinks": {},
+            "sinks_db": queries.findAndRunQuery("SqlSinks"),
+            "sinks_xxs": queries.findAndRunQuery("XssSinks"),
+            "sinks_external": {},
+        },
+        "diagnostics": {
+            "full": queries.findAndRunQuery("Diagnostics"),
+            "summary": queries.findAndRunQuery("DiagnosticsSummary"),
+        },
+    }
 
     # METADATA["extensions"] = {}
     # feresults = (queries.findAndRunQuery("FileExtensions"),)
