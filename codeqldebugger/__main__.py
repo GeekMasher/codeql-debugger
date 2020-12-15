@@ -1,13 +1,23 @@
 import os
+import sys
 import glob
 import json
 import logging
 import argparse
 
-from ghas_debugger.codeql.databases import getDatabases
-from ghas_debugger.codeql.queries import Queries, getQueriesList, repo_extensions, compare_extensions
-from ghas_debugger.repository import getRepository
-from ghas_debugger.ghas_render import render
+# TODO: better improve this
+sys.path.append("/codeql-debugger")
+
+from codeqldebugger.__version__ import *
+from codeqldebugger.codeql.databases import getDatabases
+from codeqldebugger.codeql.queries import (
+    Queries,
+    getQueriesList,
+    repo_extensions,
+    compare_extensions,
+)
+from codeqldebugger.repository import getRepository
+from codeqldebugger.ghas_render import render
 
 
 CODEQL_BINS = ["/usr/bin/codeql"]
@@ -19,7 +29,7 @@ CODEQL_SEARCH_PATH.extend(
     glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/qlpacks/")
 )
 
-CODEQL_DATABASE = [""]
+CODEQL_DATABASE = []
 CODEQL_DATABASE.extend(glob.glob("/home/runner/work/_temp/codeql_databases/*"))
 
 
@@ -61,8 +71,10 @@ result_outout = os.path.join(arguments.results, arguments.output)
 
 # Gets a list of the CodeQL databases
 databases = getDatabases(CODEQL_DATABASE, name=arguments.database_name)
+if not databases:
+    raise Exception("No CodeQL Databases were present...")
 
-codeql_queries = getQueriesList("./queries")
+codeql_queries = getQueriesList("./queries", "/codeql-debugger/queries")
 
 # Queries
 queries = Queries(
@@ -109,16 +121,19 @@ else:
         },
     }
 
-    METADATA['extensions'] = {}
-    feresults = queries.findAndRunQuery("FileExtensions"),
-    cwd = os.getcwd()
-    repo_exts = repo_extensions(cwd)
-    db_exts = {}
-    for lang in feresults:
-        for row in list(lang.values())[0]['results']:
-            db_exts[row['extension']] = int(row['frequency'])
-        r = [{'extension': i[0], 'in_checkout': i[1][0], 'in_db': i[1][1]} for i in compare_extensions(repo_exts, db_exts)]
-        METADATA['extensions'][list(lang.keys())[0]] = r
+    # METADATA["extensions"] = {}
+    # feresults = (queries.findAndRunQuery("FileExtensions"),)
+    # cwd = os.getcwd()
+    # repo_exts = repo_extensions(cwd)
+    # db_exts = {}
+    # for lang in feresults:
+    #     for row in list(lang.values())[0]["results"]:
+    #         db_exts[row["extension"]] = int(row["frequency"])
+    #     r = [
+    #         {"extension": i[0], "in_checkout": i[1][0], "in_db": i[1][1]}
+    #         for i in compare_extensions(repo_exts, db_exts)
+    #     ]
+    #     METADATA["extensions"][list(lang.keys())[0]] = r
 
 
 # Print out the metadat / results.json
@@ -133,6 +148,8 @@ logging.info("Writing results output file :: " + result_outout)
 with open(result_outout, "w") as handle:
     json.dump(METADATA, handle, indent=2)
 
-logging.debug("Results written to storage")
+logging.info("Results written to storage")
 
-render(METADATA, "result.html")
+render(METADATA, os.path.join(arguments.results, "result.html"))
+
+logging.info("Finished CodeQL-Debugger")

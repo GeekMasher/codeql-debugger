@@ -9,7 +9,7 @@ from os.path import join, splitext
 def repo_extensions(d):
     extensions = {}
     for root, dirs, files in os.walk(d):
-        dirs[:] = [d for d in dirs if d != '.git']
+        dirs[:] = [d for d in dirs if d != ".git"]
         for f in files:
             filepath = join(root, f)
             _, ext = splitext(filepath)
@@ -24,30 +24,37 @@ def compare_extensions(ondisk, indb):
         result[ext] = (ondisk[ext], indb.get(ext, 0))
 
     result = list(result.items())
-    result.sort(key = lambda i: i[1], reverse=True)
+    result.sort(key=lambda i: i[1], reverse=True)
     return result
 
 
-def getQueriesList(root, language=None):
+def getQueriesList(*roots, language=None):
+    logging.debug("Loading queries")
+
     query_files = []
-
-    for dp, dn, filenames in os.walk(root):
-        for f in filenames:
-            path = os.path.join(dp, f)
-            if os.path.splitext(path)[1] == ".ql":
-                query_files.append(path)
-
     results = []
-    for query in query_files:
-        lang = os.path.split(query.replace(root, ""))[0]
 
-        results.append(
-            {
-                "name": os.path.splitext(os.path.basename(query))[0],
-                "path": os.path.abspath(query),
-                "language": lang.replace("/", ""),
-            }
-        )
+    for root in roots:
+        for dp, dn, filenames in os.walk(root):
+            for f in filenames:
+                path = os.path.join(dp, f)
+                if os.path.splitext(path)[1] == ".ql":
+                    query_files.append(path)
+
+        logging.debug("Number of Query File :: " + str(len(query_files)))
+
+        for query in query_files:
+            lang = os.path.split(query.replace(root, ""))[0]
+
+            results.append(
+                {
+                    "name": os.path.splitext(os.path.basename(query))[0],
+                    "path": os.path.abspath(query),
+                    "language": lang.replace("/", ""),
+                }
+            )
+
+    logging.info("Number of Queries loaded :: " + str(len(results)))
 
     return results
 
@@ -83,7 +90,13 @@ class Queries:
 
         for database in self.databases:
             logging.debug("Loading database :: " + database.get("name"))
-            for query in self.findQueries(name, database.get("language")):
+            queries = self.findQueries(name, database.get("language"))
+
+            if len(queries) == 0:
+                logging.warning("No queries to be run on CodeQL Database")
+
+            for query in queries:
+                logging.debug("Selected Query :: {name} ({language})".format(**query))
                 result = self.runQuery(query, database, self.results)
 
                 results[database.get("language")] = result
