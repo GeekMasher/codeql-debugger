@@ -1,3 +1,4 @@
+import logging
 import os
 
 
@@ -6,6 +7,7 @@ def getRepository():
 
     # Action support
     if os.environ.get("GITHUB_WORKFLOW"):
+        logging.info("Running in Actions")
         data = getActionDetails()
 
     # TODO: Add more support
@@ -19,3 +21,4 @@ def getRepository():
 
 def getActionDetails():
     data = {"name": os.environ.get("GITHUB_REPOSITORY"), "workflow_type": "Actions"}
+    return data
