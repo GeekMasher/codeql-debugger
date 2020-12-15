@@ -46,6 +46,9 @@ parser = argparse.ArgumentParser("GitHub Advance Security Debugger Action")
 parser.add_argument(
     "--debug", action="store_true", default=bool(os.environ.get("DEBUG"))
 )
+parser.add_argument(
+    "--verbose", action="store_true"
+)
 parser.add_argument("--caching", action="store_true")
 
 parser.add_argument("-d", "--databases", default="")
@@ -91,6 +94,10 @@ for binary in CODEQL_BINS:
 databases = getDatabases(CODEQL_DATABASE, name=arguments.database_name)
 
 codeql_queries = getQueriesList("./queries", "/codeql-debugger/queries")
+
+if arguments.debug and arguments.verbose:
+    for query in codeql_queries:
+        logging.debug("<Query name=\"{name}\" path=\"{path}\"".format(**query))
 
 # Queries
 queries = Queries(
@@ -170,10 +177,10 @@ if not databases:
 
 
 # Print out the metadat / results.json
-if arguments.debug:
-    print("=" * 32)
-    print(json.dumps(METADATA, indent=2))
-    print("=" * 32)
+# if arguments.debug:
+    # print("=" * 32)
+    # print(json.dumps(METADATA, indent=2))
+    # print("=" * 32)
 
 
 logging.info("Writing results output file :: " + result_outout)

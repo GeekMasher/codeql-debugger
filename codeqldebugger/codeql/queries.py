@@ -31,10 +31,12 @@ def compare_extensions(ondisk, indb):
 def getQueriesList(*roots, language=None):
     logging.debug("Loading queries")
 
-    query_files = []
     results = []
 
     for root in roots:
+        logging.debug("Loading queries from path :: " + root)
+        query_files = []
+
         for dp, dn, filenames in os.walk(root):
             for f in filenames:
                 path = os.path.join(dp, f)
@@ -96,7 +98,7 @@ class Queries:
                 logging.warning("No queries to be run on CodeQL Database")
 
             for query in queries:
-                logging.debug("Selected Query :: {name} ({language})".format(**query))
+                logging.info("Selected Query :: {name} ({language})".format(**query))
                 result = self.runQuery(query, database, self.results)
 
                 results[database.get("language")] = result
@@ -169,6 +171,11 @@ class Queries:
             with open(file_output_bqrs_logs, "w") as handle:
                 subprocess.run(command, stdout=handle, stderr=handle)
 
+            if not os.path.exists(file_output_bqrs):
+                error_msg = "BQRS file does not exist"
+                logging.error(error_msg)
+                raise Exception("error_msg")
+
         # BQRS to format
         file_output_csv = os.path.join(
             self.results_artifacts,
@@ -178,6 +185,7 @@ class Queries:
                 format="csv",
             ),
         )
+
         command = [
             self.codeql_exec,
             "bqrs",
