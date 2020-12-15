@@ -20,7 +20,10 @@ from codeqldebugger.repository import getRepository
 from codeqldebugger.ghas_render import render
 
 
-CODEQL_BINS = ["/usr/bin/codeql"]
+CODEQL_BINS = [
+    ".codeql/bin/codeql",
+    "/usr/bin/codeql"
+]
 # CodeQL Action
 CODEQL_BINS.extend(glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/codeql"))
 
@@ -73,6 +76,15 @@ if not arguments.caching:
 # Default: Result.json
 result_outout = os.path.join(arguments.results, arguments.output)
 
+# Binaries
+CODEQL_BIN = ""
+for binary in CODEQL_BINS:
+    binary = os.path.abspath(binary)
+    if os.path.exists(binary):
+        logging.info("Found CodeQL CLI :: " + binary)
+        CODEQL_BIN = binary
+        break
+
 # Gets a list of the CodeQL databases
 databases = getDatabases(CODEQL_DATABASE, name=arguments.database_name)
 
@@ -83,7 +95,7 @@ queries = Queries(
     databases=databases,
     queries=codeql_queries,
     results=arguments.results,
-    codeql=os.path.abspath(arguments.binary),
+    codeql=CODEQL_BIN,
     search_paths=CODEQL_SEARCH_PATH,
     caching=arguments.caching,
 )
