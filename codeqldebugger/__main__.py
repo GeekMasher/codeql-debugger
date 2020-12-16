@@ -95,13 +95,14 @@ if os.environ.get("GITHUB_WORKFLOW"):
     os.makedirs("/opt/hostedtoolcache/CodeQL/0.0.0-20201106/x64/", exist_ok=True)
 
     codeql_path = os.path.join(os.getcwd(), os.path.dirname(CODEQL_BIN))
-    logging.debug("Path :: " + codeql_path)
+    opt_path = "/opt/hostedtoolcache/CodeQL/0.0.0-20201106/x64/codeql"
+    logging.debug("Path :: " + codeql_path + " > " + opt_path)
     subprocess.run(
         [
             "ln",
             "-sf",
             codeql_path,
-            "/opt/hostedtoolcache/CodeQL/0.0.0-20201106/x64/codeql",
+            opt_path,
         ]
     )
 
