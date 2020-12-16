@@ -92,6 +92,7 @@ for search_path in CODEQL_SEARCH_PATHS:
 # HACK: this needs to be fixed
 if os.environ.get("GITHUB_WORKFLOW"):
     logging.debug("Enabling Symlink for GitHub Actions")
+    os.makedirs("/opt/hostedtoolcache/CodeQL/0.0.0-20201106/x64/", exist_ok=True)
     subprocess.run(
         [
             "ln",
