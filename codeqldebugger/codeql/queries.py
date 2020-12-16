@@ -214,7 +214,7 @@ class Queries:
             ),
         )
         with open(file_output_csv_logs, "w") as handle:
-            subprocess.run(command, stdout=handle, stderr=handle, env={}})
+            subprocess.run(command, stdout=handle, stderr=handle, env={})
 
         result = {
             "query_name": query.get("name"),
