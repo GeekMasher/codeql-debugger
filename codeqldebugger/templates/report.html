@@ -4,7 +4,7 @@
 <br />
 <ul class="nav nav-tabs">
     <li class="nav-item">
-        <a class="nav-link active" href="#codeql-summary">Summary</a>
+        <a class="nav-link active" href="#summary">Summary</a>
     </li>
     <li class="nav-item">
         {% if issues and (issues.get('errors') or issues.get('warnings')) %}
@@ -16,19 +16,13 @@
         {% endif %}
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="#breakdown">Breakdown</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#codeql-parsing">Parsing</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link disabled" href="#">Disabled</a>
+        <a class="nav-link" href="#diagnostics">Diagnostics</a>
     </li>
 </ul>
 
 <hr />
 <br />
-<h2 id="codeql-summary" class="display-2 text-center">Summary</h2>
+<h2 id="summary" class="display-2 text-center">Summary</h2>
 <br />
 
 <table class="table text-center">
@@ -73,13 +67,15 @@
 {% endif %}
 
 
-<h2 class="display-2 text-center">Breakdown</h2>
+{% if diagnostics %}
+<h2 id="diagnostics" class="display-2 text-center">Diagnostics</h2>
 <br />
-
-
-<!-- {% import 'components/parsing.html' as parsing %} -->
+<h3 class="display-3 text-center">Parsing</h3>
+<br />
 {% include 'components/parsing.html' with context %}
-
-<h4></h4>
+<br />
+<hr />
+<br />
+{% endif %}
 
 {% endblock %}

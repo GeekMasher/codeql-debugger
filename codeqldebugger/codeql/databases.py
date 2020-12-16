@@ -26,6 +26,7 @@ def getDatabases(roots: list, name: str = None):
             database_path = os.path.join(root, database_name)
             if os.path.islink(database_path):
                 logging.debug("Symlink was found... Follow the white rabbit")
+                database_path = os.path.realpath(database_path)
             elif not os.path.isdir(database_path):
                 logging.debug("Database path is not a dir :: " + database_path)
                 continue

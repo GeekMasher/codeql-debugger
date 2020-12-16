@@ -61,9 +61,9 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-logging.info("CodeQL Databases :: " + ",".join(CODEQL_DATABASE))
-logging.info("CodeQL Binary :: " + ",".join(CODEQL_BINS))
-logging.info("CodeQL Search Path :: " + ",".join(CODEQL_SEARCH_PATHS))
+logging.debug("CodeQL Databases Locations :: " + ",".join(CODEQL_DATABASE))
+logging.debug("CodeQL Binary Locations :: " + ",".join(CODEQL_BINS))
+logging.debug("CodeQL Search Locations :: " + ",".join(CODEQL_SEARCH_PATHS))
 
 if not arguments.caching:
     logging.debug("Caching disabled")

@@ -1,13 +1,9 @@
-{% if diagnostics %}
-<h3 id="codeql-parsing">CodeQL Parsing Issues/Errors</h3>
-<br />
-
 <table class="table text-left">
     <thead class="thead-dark">
         <tr>
             <th scope="col">Name</th>
             <th scope="col">Language</th>
-            <th scope="col">Query Count</th>
+            <th scope="col">File Count</th>
             <th scope="col" class="text-center">Status</th>
         </tr>
     </thead>
@@ -37,4 +33,3 @@
         {% endfor %}
     </tbody>
 </table>
-{% endif %}
