@@ -40,9 +40,9 @@ CODEQL_DEBUGGER_QUERY_PATHS = [
 
 CODEQL_DATABASE = [
     ".codeql/db",
-    glob.glob("etc/usr/artifacts/*"),
     "/home/runner/work/_temp/codeql_databases/",
 ]
+CODEQL_DATABASE.extend(glob.glob("etc/usr/artifacts/*"))
 
 
 parser = argparse.ArgumentParser("GitHub Advance Security Debugger Action")
