@@ -169,11 +169,13 @@ class Queries:
             )
 
             with open(file_output_bqrs_logs, "w") as handle:
-                subprocess.run(command, stdout=handle, stderr=handle)
+                subprocess.run(
+                    command, stdout=handle, stderr=handle, env=dict(os.environ)
+                )
 
             if not os.path.exists(file_output_bqrs):
                 logging.error("BQRS file does not exist")
-                with open(file_output_bqrs_logs, 'r') as handle:
+                with open(file_output_bqrs_logs, "r") as handle:
                     logging.error(handle.read())
                 raise Exception("BQRS file does not exist")
 
@@ -208,7 +210,7 @@ class Queries:
             ),
         )
         with open(file_output_csv_logs, "w") as handle:
-            subprocess.run(command, stdout=handle, stderr=handle)
+            subprocess.run(command, stdout=handle, stderr=handle, env=dict(os.environ))
 
         result = {
             "query_name": query.get("name"),
