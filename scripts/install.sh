@@ -1,9 +1,10 @@
 #!/bin/sh
-set -e
 
 # Prep
 apt-get update -y
 apt-get install -y git python3 python3-pip
+
+set -e
 
 # Clone latest
 mkdir -p .codeql
