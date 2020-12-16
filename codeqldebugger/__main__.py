@@ -93,11 +93,14 @@ for search_path in CODEQL_SEARCH_PATHS:
 if os.environ.get("GITHUB_WORKFLOW"):
     logging.debug("Enabling Symlink for GitHub Actions")
     os.makedirs("/opt/hostedtoolcache/CodeQL/0.0.0-20201106/x64/", exist_ok=True)
+
+    codeql_path = os.path.join(os.getcwd(), os.path.dirname(CODEQL_BIN))
+    logging.debug("Path :: " + codeql_path)
     subprocess.run(
         [
             "ln",
-            "-s",
-            os.path.join(os.getcwd(), CODEQL_BIN),
+            "-sf",
+            codeql_path,
             "/opt/hostedtoolcache/CodeQL/0.0.0-20201106/x64/codeql",
         ]
     )
