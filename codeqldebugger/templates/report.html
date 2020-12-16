@@ -8,7 +8,6 @@
     </li>
     <li class="nav-item">
         {% if issues and (issues.get('errors') or issues.get('warnings')) %}
-        <a class="nav-link" href="#issues" title="Tooltip on top">Issues</a>
         <button type="button" class="nav-link" data-toggle="tooltip" data-placement="top"
             title="Issues found">Issues</button>
         {% else %}
