@@ -4,13 +4,12 @@ import glob
 import json
 import logging
 import argparse
-import subprocess
 
 # TODO: better improve this
 __HERE__ = os.path.dirname(os.path.realpath(__file__))
 sys.path.append("/codeql-debugger")
 # Root repo dir
-sys.path.append(__HERE__ + "../..")
+sys.path.append(os.path.join(os.getcwd(), ".codeql", "debugger"))
 
 from codeqldebugger.__version__ import *
 from codeqldebugger.codeql.databases import getDatabases
