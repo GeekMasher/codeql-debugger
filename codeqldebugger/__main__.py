@@ -20,35 +20,24 @@ from codeqldebugger.repository import getRepository
 from codeqldebugger.ghas_render import render
 
 
-CODEQL_BINS = [
-    ".codeql/bin/codeql",
-    "/usr/bin/codeql"
-]
+CODEQL_BINS = [".codeql/bin/codeql", "/usr/bin/codeql"]
 # CodeQL Action
 CODEQL_BINS.extend(glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/codeql"))
 
-CODEQL_SEARCH_PATHS = [
-    ".codeql/bin/codeql/qlpacks"
-]
+CODEQL_SEARCH_PATHS = [".codeql/bin/codeql/qlpacks"]
 CODEQL_SEARCH_PATHS.extend(
     glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/qlpacks/")
 )
 
-CODEQL_DATABASE = [
-    ".codeql/db"
-]
-CODEQL_DATABASE.extend(
-    glob.glob("/home/runner/work/_temp/codeql_databases/*")
-)
+CODEQL_DATABASE = [".codeql/db"]
+CODEQL_DATABASE.extend(glob.glob("/home/runner/work/_temp/codeql_databases/*"))
 
 
 parser = argparse.ArgumentParser("GitHub Advance Security Debugger Action")
 parser.add_argument(
     "--debug", action="store_true", default=bool(os.environ.get("DEBUG"))
 )
-parser.add_argument(
-    "--verbose", action="store_true"
-)
+parser.add_argument("--verbose", action="store_true")
 parser.add_argument("--caching", action="store_true")
 
 parser.add_argument("-d", "--databases", default="")
@@ -106,7 +95,7 @@ codeql_queries = getQueriesList("./queries", "/codeql-debugger/queries")
 
 if arguments.debug and arguments.verbose:
     for query in codeql_queries:
-        logging.debug("<Query name=\"{name}\" path=\"{path}\"".format(**query))
+        logging.debug('<Query name="{name}" path="{path}"'.format(**query))
 
 # Queries
 queries = Queries(
@@ -140,10 +129,7 @@ else:
 
     METADATA = {
         "repository": getRepository(),
-        "issues": {
-            "errors": [],
-            "warnings": []
-        },
+        "issues": {"errors": [], "warnings": []},
         "statistics": {
             "loc": queries.findAndRunQuery("LinesOfCode"),
             "comments": queries.findAndRunQuery("LinesOfComment"),
@@ -178,10 +164,9 @@ else:
 
 
 if not databases:
-    METADATA['issues']['errors'].append({
-        "msg": "No Databases could be found on system.",
-        "data": ""
-    })
+    METADATA["issues"]["errors"].append(
+        {"msg": "No Databases could be found on system.", "data": ""}
+    )
 
 
 # Print out the metadat / results.json
