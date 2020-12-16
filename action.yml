@@ -7,11 +7,10 @@ inputs:
   databases:
     description: 'CodeQL Database Folder Location'
     required: false
-    default: /home/runner/work/_temp/codeql_databases/java
+    default: .codeql/db/codeql_databases
   database_name:
-    description: 'CodeQL Database Name (default: java)'
+    description: 'CodeQL Database Name (default: all)'
     required: false
-    default: "java"
 
 runs:
   using: 'docker'
