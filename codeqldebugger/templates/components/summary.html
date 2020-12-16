@@ -1,0 +1,70 @@
+<table class="table text-center">
+    <thead class="thead-dark">
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Repository</td>
+            <td>{{ repository.get('name') }}</td>
+        </tr>
+        <tr>
+            <td>Lines of Code (parsed, CodeQL)</td>
+            <td>
+                {% for language, data in statistics.get('loc', {}).items() %}
+                {% if data.get('results', [])|count == 0 %}
+                0 ({{ language }})
+                {% else%}
+                {% for result in data.get('results', []) %}
+                {{ result.get('col0','NA') }} ({{ language }})
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td>Sources</td>
+            <td>
+                {% for language, data in analysis.get('sources', {}).items() %}
+                {% if data.get('results', [])|count == 0 %}
+                0 ({{ language }})
+                {% else%}
+                {% for result in data.get('results', []) %}
+                {{ result.get('col0','NA') }} ({{ language }})
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td>Sinks (Databases)</td>
+            <td>
+                {% for language, data in analysis.get('sinks_db', {}).items() %}
+                {% if data.get('results', [])|count == 0 %}
+                0 ({{ language }})
+                {% else%}
+                {% for result in data.get('results', []) %}
+                {{ result.get('col0','NA') }} ({{ language }})
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+        <tr>
+            <td>Sinks (XSS)</td>
+            <td>
+                {% for language, data in analysis.get('sinks_xss', {}).items() %}
+                {% if data.get('results', [])|count == 0 %}
+                0 ({{ language }})
+                {% else%}
+                {% for result in data.get('results', []) %}
+                {{ result.get('col0','NA') }} ({{ language }})
+                {% endfor %}
+                {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+    </tbody>
+</table>

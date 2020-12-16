@@ -151,7 +151,7 @@ else:
             "sources": queries.findAndRunQuery("RemoteFlowSources"),
             "sinks": {},
             "sinks_db": queries.findAndRunQuery("SqlSinks"),
-            "sinks_xxs": queries.findAndRunQuery("XssSinks"),
+            "sinks_xss": queries.findAndRunQuery("XssSinks"),
             "sinks_external": {},
         },
         "diagnostics": {
