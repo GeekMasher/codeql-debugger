@@ -89,23 +89,6 @@ for search_path in CODEQL_SEARCH_PATHS:
         CODEQL_SEARCH_PATH = search_path
         break
 
-# HACK: this needs to be fixed
-if os.environ.get("GITHUB_WORKFLOW"):
-    logging.debug("Enabling Symlink for GitHub Actions")
-    os.makedirs("/opt/hostedtoolcache/CodeQL/0.0.0-20201106/x64/", exist_ok=True)
-
-    codeql_path = os.path.join(os.getcwd(), os.path.dirname(CODEQL_BIN))
-    opt_path = "/opt/hostedtoolcache/CodeQL/0.0.0-20201106/x64/codeql"
-    logging.debug("Path :: " + codeql_path + " > " + opt_path)
-    subprocess.run(
-        [
-            "ln",
-            "-sf",
-            codeql_path,
-            opt_path,
-        ]
-    )
-
 
 # Gets a list of the CodeQL databases
 databases = getDatabases(CODEQL_DATABASE, name=arguments.database_name)
