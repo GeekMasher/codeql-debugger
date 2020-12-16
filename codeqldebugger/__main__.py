@@ -32,6 +32,12 @@ CODEQL_SEARCH_PATHS.extend(
     glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/qlpacks/")
 )
 
+CODEQL_DEBUGGER_QUERY_PATHS = [
+    os.path.abspath(os.path.join(__HERE__, "..", "queries")),
+    "./queries",
+    "/codeql-debugger/queries",
+]
+
 CODEQL_DATABASE = [
     ".codeql/db",
     "/home/runner/work/_temp/codeql_databases/",
@@ -97,7 +103,7 @@ for search_path in CODEQL_SEARCH_PATHS:
 # Gets a list of the CodeQL databases
 databases = getDatabases(CODEQL_DATABASE, name=arguments.database_name)
 
-codeql_queries = getQueriesList("./queries", "/codeql-debugger/queries")
+codeql_queries = getQueriesList(*CODEQL_DEBUGGER_QUERY_PATHS)
 
 if arguments.debug and arguments.verbose:
     for query in codeql_queries:
