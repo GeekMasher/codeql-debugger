@@ -18,7 +18,11 @@ def getDatabases(roots: list, name: str = None):
 
         logging.info("Loading CodeQL Database Path :: " + root)
 
-        for database_name in os.listdir(root):
+        database_paths = os.listdir(root)
+        if len(database_paths) == 0:
+            logging.debug("No Database folder sub-dirs were found")
+
+        for database_name in database_paths:
             database_path = os.path.join(root, database_name)
             if not os.path.isdir(database_path):
                 logging.debug("Database path is not a dir :: " + database_path)
