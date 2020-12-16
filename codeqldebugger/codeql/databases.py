@@ -12,8 +12,13 @@ def getDatabases(roots: list, name: str = None):
     for root in roots:
         if root == "":
             continue
-        if not os.path.exists(root) and not os.path.isdir(root):
-            logging.warning("Database file does not exists :: `" + str(root) + "`")
+
+        if not os.path.exists(root):
+            logging.debug("Database dir does not exists :: `" + str(root) + "`")
+            continue
+
+        if not os.path.isdir(root):
+            logging.debug("Ignoring non dir  :: `" + str(root) + "`")
             continue
 
         logging.info("Loading CodeQL Database Path :: " + root)
