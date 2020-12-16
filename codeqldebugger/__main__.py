@@ -4,6 +4,7 @@ import glob
 import json
 import logging
 import argparse
+import subprocess
 
 # TODO: better improve this
 sys.path.append("/codeql-debugger")
@@ -79,7 +80,7 @@ for binary in CODEQL_BINS:
         CODEQL_BIN = binary
         break
 
-# Binaries
+# Search QL Suites Paths
 CODEQL_SEARCH_PATH = ""
 for search_path in CODEQL_SEARCH_PATHS:
     search_path = os.path.abspath(search_path)
@@ -87,6 +88,19 @@ for search_path in CODEQL_SEARCH_PATHS:
         logging.info("Found CodeQL QL Suite :: " + search_path)
         CODEQL_SEARCH_PATH = search_path
         break
+
+# HACK: this needs to be fixed
+if os.environ.get("GITHUB_WORKFLOW"):
+    logging.debug("Enabling Symlink for GitHub Actions")
+    subprocess.run(
+        [
+            "ln",
+            "-s",
+            os.path.join(os.getcwd(), CODEQL_BIN),
+            "/opt/hostedtoolcache/CodeQL/0.0.0-20201106/x64/codeql",
+        ]
+    )
+
 
 # Gets a list of the CodeQL databases
 databases = getDatabases(CODEQL_DATABASE, name=arguments.database_name)

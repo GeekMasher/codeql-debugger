@@ -168,15 +168,9 @@ class Queries:
                 ),
             )
 
-            # HACK: this needs to be fixed
-            env = dict(os.environ)
-            if os.environ.get("GITHUB_WORKFLOW"):
-                env['CODEQL_DIST'] = ".codeql/bin"
-                logging.debug("CodeQl Dist Env Var :: " + env.get("CODEQL_DIST"))
-
             with open(file_output_bqrs_logs, "w") as handle:
                 subprocess.run(
-                    command, stdout=handle, stderr=handle, env=env
+                    command, stdout=handle, stderr=handle, env=dict(os.environ)
                 )
 
             if not os.path.exists(file_output_bqrs):
