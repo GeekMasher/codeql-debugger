@@ -30,7 +30,7 @@ CODEQL_SEARCH_PATHS.extend(
     glob.glob("/opt/hostedtoolcache/CodeQL/*/x64/codeql/qlpacks/")
 )
 
-CODEQL_DATABASE = [".codeql/db"]
+CODEQL_DATABASE = [".codeql/db", ".codeql/db/codeql_databases"]
 CODEQL_DATABASE.extend(glob.glob("/home/runner/work/_temp/codeql_databases/*"))
 
 
