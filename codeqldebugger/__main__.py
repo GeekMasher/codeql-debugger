@@ -42,7 +42,7 @@ CODEQL_DATABASE = [
     ".codeql/db",
     "/home/runner/work/_temp/codeql_databases/",
 ]
-CODEQL_DATABASE.extend(glob.glob("etc/usr/artifacts/*"))
+CODEQL_DATABASE.extend(glob.glob(".codeql/db/*"))
 
 
 parser = argparse.ArgumentParser("GitHub Advance Security Debugger Action")
@@ -52,7 +52,7 @@ parser.add_argument(
 parser.add_argument("--verbose", action="store_true")
 parser.add_argument("--caching", action="store_true")
 
-parser.add_argument("-d", "--databases", default="")
+parser.add_argument("-d", "--databases", default=".codeql/db")
 parser.add_argument("-b", "--binary", default="codeql")
 parser.add_argument("-dn", "--database-name")
 parser.add_argument("-r", "--results", default=".codeql/results")
