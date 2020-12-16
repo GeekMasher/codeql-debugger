@@ -173,8 +173,9 @@ class Queries:
                 ),
             )
 
+            logging.debug("Setting env to null")
             with open(file_output_bqrs_logs, "w") as handle:
-                subprocess.run(command, stdout=handle, stderr=handle, env=env)
+                subprocess.run(command, stdout=handle, stderr=handle, env={})
 
             if not os.path.exists(file_output_bqrs):
                 logging.error("BQRS file does not exist")
@@ -213,7 +214,7 @@ class Queries:
             ),
         )
         with open(file_output_csv_logs, "w") as handle:
-            subprocess.run(command, stdout=handle, stderr=handle, env=env)
+            subprocess.run(command, stdout=handle, stderr=handle, env={}})
 
         result = {
             "query_name": query.get("name"),
