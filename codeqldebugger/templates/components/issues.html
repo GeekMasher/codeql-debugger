@@ -1,0 +1,27 @@
+<h2 id="issues" class="display-2 text-center">Issues</h2>
+<br />
+
+<div class="row">
+    <div class="col">
+        {% if issues.get('errors') %}
+        <div class="card card-body">
+            {% for error in issues.get('errors', [])%}
+            <div class="alert alert-danger" role="alert">
+                {{ error.get('msg') }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    <div class="col">
+        {% if issues.get('warnings') %}
+        <div class="card card-body">
+            {% for error in issues.get('warnings', [])%}
+            <div class="alert alert-warning" role="alert">
+                {{ error.get('msg') }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>

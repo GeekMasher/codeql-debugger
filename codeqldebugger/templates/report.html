@@ -1,68 +1,86 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1 class="display-1 text-center">Debugger Report</h1>
-  <br />
-  <ul class="nav nav-tabs">
-      <li class="nav-item">
+<h1 class="display-1 text-center">Debugger Report</h1>
+<br />
+<ul class="nav nav-tabs">
+    <li class="nav-item">
         <a class="nav-link active" href="#codeql-summary">Summary</a>
-      </li>
-      <li class="nav-item">
+    </li>
+    <li class="nav-item">
+        {% if issues and (issues.get('errors') or issues.get('warnings')) %}
+        <a class="nav-link" href="#issues" title="Tooltip on top">Issues</a>
+        <button type="button" class="nav-link" data-toggle="tooltip" data-placement="top"
+            title="Issues found">Issues</button>
+        {% else %}
+        <button type="button" class="nav-link disabled" data-toggle="tooltip" data-placement="top"
+            title="Issues not found">Issues</button>
+        {% endif %}
+    </li>
+    <li class="nav-item">
         <a class="nav-link" href="#breakdown">Breakdown</a>
-      </li>
-      <li class="nav-item">
+    </li>
+    <li class="nav-item">
         <a class="nav-link" href="#codeql-parsing">Parsing</a>
-      </li>
-      <li class="nav-item">
+    </li>
+    <li class="nav-item">
         <a class="nav-link disabled" href="#">Disabled</a>
-      </li>
-    </ul>
+    </li>
+</ul>
 
-    <hr />
-    <br />
-    <h2 id="codeql-summary" class="display-2 text-center">Summary</h2>
-    <br />
+<hr />
+<br />
+<h2 id="codeql-summary" class="display-2 text-center">Summary</h2>
+<br />
 
-    <table class="table text-center">
-      <thead class="thead-dark">
+<table class="table text-center">
+    <thead class="thead-dark">
         <tr>
-          <th scope="col">Name</th>
-          <th scope="col">Value</th>
+            <th scope="col">Name</th>
+            <th scope="col">Value</th>
         </tr>
-      </thead>
-      <tbody>
+    </thead>
+    <tbody>
         <tr>
-          <td>Repository</td>
-          <td>{{ repository.get('name') }}</td>
-        </tr>
-        <tr>
-          <td>Lines of Code (parsed, CodeQL)</td>
-          <td>{{ statistics.get('loc',{}).get('java',{}).get('results',[{}])[0].get('col0','NA') }}</td>
+            <td>Repository</td>
+            <td>{{ repository.get('name') }}</td>
         </tr>
         <tr>
-          <td>Sources</td>
-          <td>{{ analysis.get('sources',{}).get('java',{}).get('results',[{}])[0].get('col0','NA') }}</td>
+            <td>Lines of Code (parsed, CodeQL)</td>
+            <td>{{ statistics.get('loc',{}).get('java',{}).get('results',[{}])[0].get('col0','NA') }}</td>
         </tr>
         <tr>
-          <td>Sinks (Databases)</td>
-          <td>{{ analysis.get('sinks_db',{}).get('java',{}).get('results',[{}])[0].get('col0','NA') }}</td>
+            <td>Sources</td>
+            <td>{{ analysis.get('sources',{}).get('java',{}).get('results',[{}])[0].get('col0','NA') }}</td>
         </tr>
         <tr>
-          <td>Sinks (XSS)</td>
-          <td>{{ analysis.get('sinks_xss',{}).get('java',{}).get('results',[{}])[0].get('col0','NA') }}</td>
+            <td>Sinks (Databases)</td>
+            <td>{{ analysis.get('sinks_db',{}).get('java',{}).get('results',[{}])[0].get('col0','NA') }}</td>
         </tr>
-      </tbody>
-    </table>
+        <tr>
+            <td>Sinks (XSS)</td>
+            <td>{{ analysis.get('sinks_xss',{}).get('java',{}).get('results',[{}])[0].get('col0','NA') }}</td>
+        </tr>
+    </tbody>
+</table>
 
-    <br />
-    <hr />
+<br />
+<hr />
+<br />
+{% if issues and (issues.get('errors') or issues.get('warnings')) %}
+{% include 'components/issues.html' with context %}
+<br />
+<hr />
+<br />
+{% endif %}
 
-    <h2 class="display-2 text-center">Breakdown</h2>
-    <br />
 
-    
-    <!-- {% import 'components/parsing.html' as parsing %} -->
-    {% include 'components/parsing.html' with context %}
-    
-    <h4></h4>
+<h2 class="display-2 text-center">Breakdown</h2>
+<br />
+
+
+<!-- {% import 'components/parsing.html' as parsing %} -->
+{% include 'components/parsing.html' with context %}
+
+<h4></h4>
 
 {% endblock %}
