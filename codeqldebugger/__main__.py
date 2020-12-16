@@ -7,7 +7,10 @@ import argparse
 import subprocess
 
 # TODO: better improve this
+__HERE__ = os.path.dirname(os.path.realpath(__file__))
 sys.path.append("/codeql-debugger")
+# Root repo dir
+sys.path.append(__HERE__ + "../..")
 
 from codeqldebugger.__version__ import *
 from codeqldebugger.codeql.databases import getDatabases
