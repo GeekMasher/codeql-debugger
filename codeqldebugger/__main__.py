@@ -40,6 +40,7 @@ CODEQL_DEBUGGER_QUERY_PATHS = [
 
 CODEQL_DATABASE = [
     ".codeql/db",
+    glob.glob("etc/usr/artifacts/*"),
     "/home/runner/work/_temp/codeql_databases/",
 ]
 
@@ -144,7 +145,7 @@ else:
         "issues": {"errors": [], "warnings": []},
         "statistics": {
             "loc": queries.findAndRunQuery("LinesOfCode"),
-            "comments": queries.findAndRunQuery("LinesOfComment"),
+            # "comments": queries.findAndRunQuery("LinesOfComment"),
             # "extensions": queries.findAndRunQuery("FileExtensions"),
         },
         "analysis": {
