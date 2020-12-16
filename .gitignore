@@ -2,6 +2,7 @@
 .env
 .cache
 /results
+/testing
 /bin
 .codeql/
 scripts/testing-**.sh
