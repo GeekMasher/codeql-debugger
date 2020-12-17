@@ -19,6 +19,8 @@ from codeqldebugger.codeql.queries import (
     repo_extensions,
     compare_extensions,
 )
+from codeqldebugger.utils.issues import Issues
+from codeqldebugger.rules import RULES
 from codeqldebugger.repository import getRepository
 from codeqldebugger.ghas_render import render
 
@@ -137,6 +139,11 @@ if arguments.caching and os.path.exists(result_outout):
     with open(result_outout, "r") as handle:
         METADATA = json.load(handle)
 
+    if METADATA.get("issues", {}).get("errors"):
+        METADATA["issues"]["errors"] = []
+    if METADATA.get("issues", {}).get("warnings"):
+        METADATA["issues"]["warnings"] = []
+
 else:
     logging.debug("Building metadata object")
 
@@ -153,7 +160,7 @@ else:
             "sinks": {},
             "sinks_db": queries.findAndRunQuery("SqlSinks"),
             "sinks_xss": queries.findAndRunQuery("XssSinks"),
-            "sinks_external": {},
+            "sinks_external": queries.findAndRunQuery("ExternalSinks"),
         },
         "diagnostics": {
             "full": queries.findAndRunQuery("Diagnostics"),
@@ -181,6 +188,16 @@ if not databases:
         {"msg": "No Databases could be found on system.", "data": ""}
     )
 
+# Run rules
+logging.info("Running rules")
+
+for rule_id, rule_func in RULES.items():
+    logging.debug("Running Rule :: " + str(rule_id))
+    rule_func(rule_id, METADATA)
+
+
+METADATA["issues"]["errors"].extend(Issues.getErrors())
+METADATA["issues"]["warnings"].extend(Issues.getWarnings())
 
 # Print out the metadat / results.json
 if arguments.debug and arguments.verbose:

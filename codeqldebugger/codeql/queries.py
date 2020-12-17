@@ -94,9 +94,13 @@ class Queries:
             logging.debug("Loading database :: " + database.get("name"))
             queries = self.findQueries(name, database.get("language"))
 
+            results[database.get("language")] = {}
+
             if len(queries) == 0:
                 logging.warning("No queries to be run on CodeQL Database")
                 logging.warning("Database :: {name} ({language})".format(**database))
+
+                results[database.get("language")] = {"query_name": name}
 
             for query in queries:
                 logging.info("Selected Query :: {name} ({language})".format(**query))
@@ -236,6 +240,10 @@ class Queries:
         return_results = {}
 
         for language, result in results.items():
+
+            if not result.get("path"):
+                logging.warning("Result path not present")
+                continue
 
             logging.debug("Processing Result file :: " + result.get("path"))
 

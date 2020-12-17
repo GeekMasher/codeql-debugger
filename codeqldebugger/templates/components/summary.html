@@ -1,4 +1,4 @@
-<table class="table text-center">
+<table class="table text-left">
     <thead class="thead-dark">
         <tr>
             <th scope="col">Name</th>
@@ -21,9 +21,11 @@
                 {{ result.get('col0','NA') }} ({{ language }})
                 {% endfor %}
                 {% endif %}
+                <br />
                 {% endfor %}
             </td>
         </tr>
+        {% if advance_summary %}
         <tr>
             <td>Sources</td>
             <td>
@@ -35,6 +37,7 @@
                 {{ result.get('col0','NA') }} ({{ language }})
                 {% endfor %}
                 {% endif %}
+                <br />
                 {% endfor %}
             </td>
         </tr>
@@ -49,6 +52,7 @@
                 {{ result.get('col0','NA') }} ({{ language }})
                 {% endfor %}
                 {% endif %}
+                <br />
                 {% endfor %}
             </td>
         </tr>
@@ -63,8 +67,23 @@
                 {{ result.get('col0','NA') }} ({{ language }})
                 {% endfor %}
                 {% endif %}
+                <br />
                 {% endfor %}
             </td>
         </tr>
+        <tr>
+            <td>Sinks (External/Unknown Calls)</td>
+            <td>
+                {% for language, data in analysis.get('sinks_external', {}).items() %}
+                {% if data.get('results', [])|count == 0 %}
+                0 ({{ language }})
+                {% else%}
+                {{ data.get('results', [])|count }} ({{ language }})
+                {% endif %}
+                <br />
+                {% endfor %}
+            </td>
+        </tr>
+        {% endif %}
     </tbody>
 </table>
