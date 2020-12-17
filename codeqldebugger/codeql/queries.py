@@ -96,6 +96,7 @@ class Queries:
 
             if len(queries) == 0:
                 logging.warning("No queries to be run on CodeQL Database")
+                logging.warning("Database :: {name} ({language})".format(**database))
 
             for query in queries:
                 logging.info("Selected Query :: {name} ({language})".format(**query))
@@ -111,8 +112,13 @@ class Queries:
         results = []
 
         for query in self.queries:
-            if query.get("name") == name:
-                results.append(query)
+            if query.get("name") != name:
+                continue
+
+            if language and language != query.get("language"):
+                continue
+
+            results.append(query)
 
         return results
 
