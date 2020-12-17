@@ -8,6 +8,7 @@ black = "==20.8b1"
 
 [packages]
 jinja2 = "*"
+requests = "*"
 
 [requires]
 python_version = "3.9"

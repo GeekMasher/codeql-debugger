@@ -10,7 +10,7 @@ mkdir -p .codeql
 git clone --depth=1 https://github.com/GeekMasher/codeql-debugger.git .codeql/debugger
 
 # Install deps
-python3 -m pip install jinja2
+python3 -m pip install jinja2 requests
 
 
 export PYTHONPATH="$PYTHONPATH:$PWD/.codeql/debugger"
