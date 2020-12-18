@@ -192,8 +192,13 @@ if not databases:
 logging.info("Running rules")
 
 for rule_id, rule_func in RULES.items():
-    logging.debug("Running Rule :: " + str(rule_id))
-    rule_func(rule_id, METADATA)
+    try:
+        logging.debug("Running Rule :: " + str(rule_id))
+
+        rule_func(rule_id, METADATA)
+
+    except Exception as error:
+        logging.warning("Rule Exception - " + str(error))
 
 
 METADATA["issues"]["errors"].extend(Issues.getErrors())
