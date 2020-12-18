@@ -3,6 +3,7 @@
 
 <div class="row">
     <div class="col">
+        <h4>Errors: {{ issues.get('errors')|count }}</h4>
         {% if issues.get('errors') %}
         <div class="card card-body">
             {% for error in issues.get('errors', [])%}
@@ -14,6 +15,7 @@
         {% endif %}
     </div>
     <div class="col">
+        <h4>Warnings: {{ issues.get('warnings')|count }}</h4>
         {% if issues.get('warnings') %}
         <div class="card card-body">
             {% for error in issues.get('warnings', [])%}
